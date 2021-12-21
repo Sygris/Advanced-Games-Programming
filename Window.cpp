@@ -1,7 +1,7 @@
-#include "Window.h"
+#include "WindowContainer.h"
 #include <DxErr.h>
 
-bool Window::Initliase(HINSTANCE hInstance, std::string windowTitle, std::string windowClass, int width, int height)
+bool Window::Initliase(WindowContainer* pWindowContainer, HINSTANCE hInstance, std::string windowTitle, std::string windowClass, int width, int height)
 {
     m_hInstance = hInstance;
     m_windowTitle = windowTitle;
@@ -26,7 +26,7 @@ bool Window::Initliase(HINSTANCE hInstance, std::string windowTitle, std::string
 		NULL,
 		NULL,
 		m_hInstance,
-		NULL
+		pWindowContainer
 	);
 
 	if (m_handle == NULL)
@@ -40,6 +40,15 @@ bool Window::Initliase(HINSTANCE hInstance, std::string windowTitle, std::string
 	SetFocus(m_handle);
 
     return true;
+}
+
+Window::~Window()
+{
+	if (m_handle != NULL)
+	{
+		UnregisterClass(m_windowClassName.c_str(), m_hInstance);
+		DestroyWindow(m_handle);
+	}
 }
 
 bool Window::ProcessMessages()
@@ -67,21 +76,61 @@ bool Window::ProcessMessages()
     return true;
 }
 
-Window::~Window()
+#pragma region Message Handler Setup and Redirect
+LRESULT CALLBACK HandleMessageRedirect(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (m_handle != NULL)
+	switch (uMsg)
 	{
-		UnregisterClass(m_windowClassName.c_str(), m_hInstance);
-		DestroyWindow(m_handle);
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		return 0;
+	default:
+	{
+		// Retrives ptr to Window class
+		WindowContainer* const pWindow = reinterpret_cast<WindowContainer*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+
+		// Redirect message to windwo class handler
+		return pWindow->WindowProc(hwnd, uMsg, wParam, lParam);
+	}
 	}
 }
+
+LRESULT CALLBACK HandleMessageSetup(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case WM_NCCREATE:
+	{
+		// Extract ptr to WindowContainer class from creation data
+		const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
+		WindowContainer* pWindow = reinterpret_cast<WindowContainer*>(pCreate->lpCreateParams);
+
+		// Sanity check
+		if (pWindow == nullptr)
+		{
+			DXTRACE_MSG(TEXT("CRitical Error: Pointer to window container is null during WM_NCCREATE"));
+			exit(-1);
+		}
+
+		// Set WinAPI-managed user data to store ptr to WindowContainer class
+		SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pWindow));
+		// Set message proc to normal handler now that setup is finished
+		SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(HandleMessageRedirect));
+		// Redirect message to WindowContainer class handler
+		return pWindow->WindowProc(hwnd, uMsg, wParam, lParam);
+	}
+	default:
+		DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+}
+#pragma endregion
 
 void Window::RegisterWindowClass()
 {
 	WNDCLASSEX wcex = { 0 };
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	wcex.lpfnWndProc = DefWindowProc;
+	wcex.lpfnWndProc = HandleMessageSetup;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = m_hInstance;

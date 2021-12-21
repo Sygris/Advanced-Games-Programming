@@ -2,10 +2,12 @@
 #include <Windows.h>
 #include <string>
 
+class WindowContainer;
+
 class Window
 {
 public:
-	bool Initliase(HINSTANCE hInstance, std::string windowTitle, std::string windowClass, int width, int height);
+	bool Initliase(WindowContainer* pWindowContainer, HINSTANCE hInstance, std::string windowTitle, std::string windowClass, int width, int height);
 	bool ProcessMessages();
 
 	~Window();
