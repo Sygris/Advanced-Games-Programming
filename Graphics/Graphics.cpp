@@ -7,7 +7,9 @@ bool Graphics::Initialise(HWND hWnd, int width, int height)
 
 	if (!InitialiseShaders())
 		return false;
-	// FUTURE: Init shaders, scenes, etc
+
+	if (!InitialiseScene())
+		return false;
 
 	return true;
 }
@@ -15,8 +17,20 @@ bool Graphics::Initialise(HWND hWnd, int width, int height)
 void Graphics::RenderFrame()
 {
 	float bgcolor[] = { 0.0f, 0.0f, 1.0, 1.0f };
-
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, bgcolor);
+
+	m_deviceContext->IASetInputLayout(m_vertexShader.GetInputLayout());
+	m_deviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+	m_deviceContext->VSSetShader(m_vertexShader.GetShader(), NULL, 0);
+	m_deviceContext->PSSetShader(m_pixelShader.GetShader(), NULL, 0);
+
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	m_deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+
+	m_deviceContext->Draw(1, 0);
+
 	m_swapChain->Present(0, NULL);
 }
 
@@ -110,6 +124,19 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, nullptr);
 #pragma endregion
 
+#pragma region Create and Set Viewport
+	D3D11_VIEWPORT viewport;
+	ZeroMemory(&viewport, sizeof(viewport));
+
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = width;
+	viewport.Height = height;
+
+	// Set viewport
+	m_deviceContext->RSSetViewports(1, &viewport);
+#pragma endregion
+
 	return true;
 }
 
@@ -137,7 +164,6 @@ bool Graphics::InitialiseShaders()
 	}
 #pragma endregion
 
-
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_INSTANCE_DATA, 0},
@@ -145,8 +171,41 @@ bool Graphics::InitialiseShaders()
 
 	UINT numOfLayout = ARRAYSIZE(layout);
 
-	if (!m_vertexShader.Initialise(m_device, shaderFolder + L"vertex.cso", layout, numOfLayout))
+	if (!m_vertexShader.Initialise(m_device, shaderFolder + L"VertexShader.cso", layout, numOfLayout))
 		return false;
+
+	if (!m_pixelShader.Initialise(m_device, shaderFolder + L"PixelShader.cso"))
+		return false;
+
+	return true;
+}
+
+bool Graphics::InitialiseScene()
+{
+	Vertex v[] =
+	{
+		Vertex(0.0f, 0.0f),
+	};
+
+	D3D11_BUFFER_DESC vertexBufferDesc;
+	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
+
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(Vertex) * ARRAYSIZE(v);
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA vertexBufferData;
+	ZeroMemory(&vertexBufferData, sizeof(vertexBufferData));
+	vertexBufferData.pSysMem = v;
+
+	HRESULT hr = m_device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_vertexBuffer);
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create vertex buffer!");
+		return false;
+	}
 
 	return true;
 }
