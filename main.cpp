@@ -5,11 +5,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrev, _In_ LPSTR lp
 {
 	Engine engine;
 
-	engine.Initliase(hInst, "Title", "MyWindowClass", 1920, 1080);
+	engine.Initliase(hInst, "Title", "MyWindowClass", 800, 600);
 
 	while (engine.ProcessMessages())
 	{
-
+		engine.Update();
 	}
 
 	return 0;

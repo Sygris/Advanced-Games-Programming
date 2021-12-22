@@ -120,7 +120,7 @@ LRESULT CALLBACK HandleMessageSetup(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		return pWindow->WindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	default:
-		DefWindowProc(hwnd, uMsg, wParam, lParam);
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 }
 #pragma endregion

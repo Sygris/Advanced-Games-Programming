@@ -11,6 +11,8 @@ public:
 	bool ProcessMessages();
 
 	~Window();
+
+	HWND GetHandler() { return m_handle; }
 private:
 	void RegisterWindowClass();
 	
