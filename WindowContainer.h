@@ -1,6 +1,7 @@
 #pragma once
 #include "Window.h"
-#include "Keyboard.h"
+#include "Input/Keyboard.h"
+#include "Graphics/Graphics.h"
 
 /// <summary>
 /// Class that contains our Window and other classes relevant to the window, e.g: Mouse, Keyboard, WndProc
@@ -13,6 +14,7 @@ public:
 protected:
 	Window m_window;
 	Keyboard* m_keyboard;
+	Graphics m_graphics;
 private:
 
 };

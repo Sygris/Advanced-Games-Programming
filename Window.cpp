@@ -29,6 +29,8 @@ bool Window::Initliase(WindowContainer* pWindowContainer, HINSTANCE hInstance, s
 		pWindowContainer
 	);
 
+	CenterWindow();
+
 	if (m_handle == NULL)
 	{
 		DXTRACE_MSG(TEXT("Failed to Create a window!"));
@@ -40,6 +42,17 @@ bool Window::Initliase(WindowContainer* pWindowContainer, HINSTANCE hInstance, s
 	SetFocus(m_handle);
 
     return true;
+}
+
+void Window::CenterWindow()
+{
+	RECT rc;
+	GetWindowRect(m_handle, &rc);
+
+	int xPos = (GetSystemMetrics(SM_CXSCREEN) - rc.right) / 2;
+	int yPos = (GetSystemMetrics(SM_CYSCREEN) - rc.bottom) / 2;
+
+	SetWindowPos(m_handle, 0, xPos, yPos, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 }
 
 Window::~Window()
@@ -56,7 +69,7 @@ bool Window::ProcessMessages()
 	MSG msg;
 	ZeroMemory(&msg, sizeof(MSG));
 
-	if (PeekMessage(&msg, m_handle, 0, 0, PM_REMOVE))
+	while (PeekMessage(&msg, m_handle, 0, 0, PM_REMOVE))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
@@ -108,7 +121,7 @@ LRESULT CALLBACK HandleMessageSetup(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		// Sanity check
 		if (pWindow == nullptr)
 		{
-			DXTRACE_MSG(TEXT("CRitical Error: Pointer to window container is null during WM_NCCREATE"));
+			DXTRACE_MSG(TEXT("Critical Error: Pointer to window container is null during WM_NCCREATE"));
 			exit(-1);
 		}
 

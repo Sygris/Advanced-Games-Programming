@@ -9,12 +9,12 @@ class Window
 public:
 	bool Initliase(WindowContainer* pWindowContainer, HINSTANCE hInstance, std::string windowTitle, std::string windowClass, int width, int height);
 	bool ProcessMessages();
-
 	~Window();
 
 	HWND GetHandler() { return m_handle; }
 private:
 	void RegisterWindowClass();
+	void CenterWindow();
 	
 	HWND m_handle = nullptr; // Handle to this window
 	HINSTANCE m_hInstance = nullptr; // Handle to the application instacnce

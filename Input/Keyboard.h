@@ -3,7 +3,7 @@
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
-#define DIRECTINPUT_VERSION 0x0800 
+#define DIRECTINPUT_VERSION 0x0800 // Sets the DirectInput version
 #include <d3d11.h>
 #include <dinput.h>
 

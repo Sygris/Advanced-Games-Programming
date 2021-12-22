@@ -2,13 +2,16 @@
 
 bool Engine::Initliase(HINSTANCE hInstance, std::string windowTitle, std::string windowClass, int width, int height)
 {
-	bool result;
-	result = m_window.Initliase(this, hInstance, windowTitle, windowClass, width, height);
+	if(!m_window.Initliase(this, hInstance, windowTitle, windowClass, width, height)) 
+		return false;
+
+	if (!m_graphics.Initialise(m_window.GetHandler(), width, height))
+		return false;
 
 	m_keyboard = new Keyboard(hInstance, m_window.GetHandler());
 	m_keyboard->InitialiseInput();
 
-	return result;
+	return true;
 }
 
 bool Engine::ProcessMessages()
@@ -22,6 +25,10 @@ void Engine::Update()
 
 	if (m_keyboard->IsKeyPreesed(DIK_A))
 	{
-		
 	}
+}
+
+void Engine::RenderFrame()
+{
+	m_graphics.RenderFrame();
 }
