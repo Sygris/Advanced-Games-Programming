@@ -2,13 +2,14 @@
 #include <DirectXMath.h>
 
 /// <summary>
-/// Struct that represent 2D and 3D vertex
+/// Struct that represent 3D vertex
 /// </summary>
 struct Vertex
 {
 	Vertex() {};
-	Vertex(float x, float y)
-		: m_position(x, y) {}
+	Vertex(float x, float y, float z, float u, float v)
+		: m_position(x, y, z), m_texCoord(u, v) {}
 
-	DirectX::XMFLOAT2 m_position;
+	DirectX::XMFLOAT3 m_position{};
+	DirectX::XMFLOAT2 m_texCoord{};
 };

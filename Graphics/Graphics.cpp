@@ -1,4 +1,5 @@
 #include "Graphics.h"
+#include <D3DX11.h>
 
 bool Graphics::Initialise(HWND hWnd, int width, int height)
 {
@@ -16,22 +17,28 @@ bool Graphics::Initialise(HWND hWnd, int width, int height)
 
 void Graphics::RenderFrame()
 {
-	float bgcolor[] = { 0.0f, 0.0f, 1.0, 1.0f };
+	float bgcolor[] = { 0.0f, 0.0f, 0.0, 1.0f };
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, bgcolor);
+	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	m_deviceContext->IASetInputLayout(m_vertexShader.GetInputLayout());
-	m_deviceContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
-
+	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_deviceContext->RSSetState(m_rasterizerState);
+	m_deviceContext->OMSetDepthStencilState(m_depthStencilState, 0);
+	m_deviceContext->PSSetSamplers(0, 1, &m_samplerState);
 	m_deviceContext->VSSetShader(m_vertexShader.GetShader(), NULL, 0);
 	m_deviceContext->PSSetShader(m_pixelShader.GetShader(), NULL, 0);
 
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
+
+	// Square
+	m_deviceContext->PSSetShaderResources(0, 1, &m_texture);
 	m_deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+	m_deviceContext->IASetIndexBuffer(m_indicesBuffer, DXGI_FORMAT_R32_UINT, 0);
+	m_deviceContext->DrawIndexed(6, 0, 0);
 
-	m_deviceContext->Draw(1, 0);
-
-	m_swapChain->Present(0, NULL);
+	m_swapChain->Present(1, NULL);
 }
 
 bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
@@ -121,20 +128,101 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 		return false;
 	}
 
-	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, nullptr);
+#pragma region Describe Depth/Stencil Buffer
+	D3D11_TEXTURE2D_DESC depthStencilBuffer;
+	depthStencilBuffer.Width = width;
+	depthStencilBuffer.Height = height;
+	depthStencilBuffer.MipLevels = 1;
+	depthStencilBuffer.ArraySize = 1;
+	depthStencilBuffer.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilBuffer.SampleDesc.Count = 1;
+	depthStencilBuffer.SampleDesc.Quality = 0;
+	depthStencilBuffer.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilBuffer.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilBuffer.CPUAccessFlags = 0;
+	depthStencilBuffer.MiscFlags = 0;
+
+	hr = m_device->CreateTexture2D(&depthStencilBuffer, NULL, &m_depthStencilBuffer);
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create Depth Stencil Buffer!");
+		return false;
+	}
+
+	hr = m_device->CreateDepthStencilView(m_depthStencilBuffer, NULL, &m_depthStencilView);
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create Depth Stencil View!");
+		return false;
+	}
+#pragma endregion
+
+	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
 #pragma endregion
 
 #pragma region Create and Set Viewport
 	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(viewport));
+	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	viewport.Width = width;
 	viewport.Height = height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
 
 	// Set viewport
 	m_deviceContext->RSSetViewports(1, &viewport);
+#pragma endregion
+
+#pragma region Create Depth Stencil State
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+	hr = m_device->CreateDepthStencilState(&depthStencilDesc, &m_depthStencilState);
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create Depth Stencil State!");
+		return false;
+	}
+#pragma endregion
+
+#pragma region Create Rasterizer State
+	D3D11_RASTERIZER_DESC rasterizerDesc;
+	ZeroMemory(&rasterizerDesc, sizeof(rasterizerDesc));
+
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_BACK;
+
+	hr = m_device->CreateRasterizerState(&rasterizerDesc, &m_rasterizerState);
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create Rasterizer State!");
+		return false;
+	}
+#pragma endregion 
+
+#pragma region Create Sampler state
+	D3D11_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	hr = m_device->CreateSamplerState(&samplerDesc, &m_samplerState);
+	if (FAILED(hr))
+	{
+		return false;
+	}
 #pragma endregion
 
 	return true;
@@ -166,7 +254,8 @@ bool Graphics::InitialiseShaders()
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_INSTANCE_DATA, 0},
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
 	UINT numOfLayout = ARRAYSIZE(layout);
@@ -182,9 +271,19 @@ bool Graphics::InitialiseShaders()
 
 bool Graphics::InitialiseScene()
 {
+	// Textured Square
 	Vertex v[] =
 	{
-		Vertex(0.0f, 0.0f),
+		Vertex(-0.5f, -0.5f, 1.0f, 0.0f, 1.0f), // Bottom Left  - [0]
+		Vertex(-0.5f,  0.5f, 1.0f, 0.0f, 0.0f), // Top Left		- [1]
+		Vertex(0.5f,   0.5f, 1.0f, 1.0f, 0.0f), // Top Right	- [2]
+		Vertex(0.5f,  -0.5f, 1.0f, 1.0f, 1.0f), // Bottom Right	- [3]
+	};
+
+	DWORD indices[] =
+	{
+		0, 1, 2,
+		0, 2, 3
 	};
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
@@ -204,7 +303,52 @@ bool Graphics::InitialiseScene()
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to create vertex buffer!");
-		return false;
+		return hr;
+	}
+
+	D3D11_BUFFER_DESC indexBufferDesc;
+	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
+
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(DWORD) * ARRAYSIZE(indices);
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA indexBufferData;
+	ZeroMemory(&indexBufferData, sizeof(indexBufferData));
+	indexBufferData.pSysMem = indices;
+
+	hr = m_device->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indicesBuffer);
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create indices buffer!");
+		return hr;
+	}
+
+	// Load Texture
+	hr = D3DX11CreateShaderResourceViewFromFile(m_device, "Assets/Textures/LewisPaella.png", NULL, NULL, &m_texture, NULL);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	// Initialise Constant Buffer
+	D3D11_BUFFER_DESC cbDesc;
+	ZeroMemory(&cbDesc, sizeof(cbDesc));
+
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.ByteWidth = static_cast<UINT>(sizeof(CB_VertexShader) + (16 - sizeof(CB_VertexShader)));
+	cbDesc.StructureByteStride = 0;
+
+	hr = m_device->CreateBuffer(&cbDesc, NULL, &m_constantBuffer);
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create constant buffer!");
+		return hr;
 	}
 
 	return true;

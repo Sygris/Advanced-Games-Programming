@@ -21,7 +21,7 @@ bool VertexShader::Initialise(ID3D11Device*& device, std::wstring shaderPath, D3
 	hr = device->CreateInputLayout(layoutDesc, numOfElements, m_shaderBuffer->GetBufferPointer(), m_shaderBuffer->GetBufferSize(), &m_inputLayout);
 	if (FAILED(hr))
 	{
-		OutputDebugString("Failed to get pointer to back buffer!");
+		OutputDebugString("Failed to create input layout!");
 		return false;
 	}
 

@@ -11,8 +11,9 @@ bool Window::Initliase(WindowContainer* pWindowContainer, HINSTANCE hInstance, s
 
     RegisterWindowClass();
 
-	RECT rc = { 0, 0, m_width, m_height };
-	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+	RECT rc = { 0, 0, width, height };
+
+	AdjustWindowRect(&rc, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
 
 	m_handle = CreateWindowEx(
 		0,
