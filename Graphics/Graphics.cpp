@@ -3,7 +3,10 @@
 
 bool Graphics::Initialise(HWND hWnd, int width, int height)
 {
-	if (!InitialiseDirectX(hWnd, width, height))
+	m_windowWidth = width;
+	m_windowHeight = height;
+
+	if (!InitialiseDirectX(hWnd))
 		return false;
 
 	if (!InitialiseShaders())
@@ -18,30 +21,39 @@ bool Graphics::Initialise(HWND hWnd, int width, int height)
 void Graphics::RenderFrame()
 {
 	float bgcolor[] = { 0.0f, 0.0f, 0.0, 1.0f };
-	m_deviceContext->ClearRenderTargetView(m_renderTargetView, bgcolor);
-	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView.Get(), bgcolor);
+	m_deviceContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	m_deviceContext->IASetInputLayout(m_vertexShader.GetInputLayout());
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	m_deviceContext->RSSetState(m_rasterizerState);
-	m_deviceContext->OMSetDepthStencilState(m_depthStencilState, 0);
-	m_deviceContext->PSSetSamplers(0, 1, &m_samplerState);
+	m_deviceContext->RSSetState(m_rasterizerState.Get());
+	m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
+	m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 	m_deviceContext->VSSetShader(m_vertexShader.GetShader(), NULL, 0);
 	m_deviceContext->PSSetShader(m_pixelShader.GetShader(), NULL, 0);
 
-	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 
-	// Square
-	m_deviceContext->PSSetShaderResources(0, 1, &m_texture);
-	m_deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-	m_deviceContext->IASetIndexBuffer(m_indicesBuffer, DXGI_FORMAT_R32_UINT, 0);
-	m_deviceContext->DrawIndexed(6, 0, 0);
+	// Update Constant Buffer
+	XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
 
-	m_swapChain->Present(1, NULL);
+	m_constantBuffer.data.mat = worldMatrix * m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix();
+	m_constantBuffer.data.mat = DirectX::XMMatrixTranspose(m_constantBuffer.data.mat);
+	if (!m_constantBuffer.ApplyChanges())
+		return;
+
+	m_deviceContext->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
+
+	// Square
+	m_deviceContext->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
+	m_deviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), m_vertexBuffer.StridePtr(), &offset);
+	m_deviceContext->IASetIndexBuffer(m_indicesBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	m_deviceContext->DrawIndexed(m_indicesBuffer.BufferSize(), 0, 0);
+
+	m_swapChain->Present(0, NULL);
 }
 
-bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
+bool Graphics::InitialiseDirectX(HWND hWnd)
 {
 	// Enables Devices Debugging Capabilities when in Debug 
 	UINT createDeviceFlags = 0;
@@ -73,8 +85,8 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 	swapChainDesc.BufferCount = 1;
-	swapChainDesc.BufferDesc.Width = width;
-	swapChainDesc.BufferDesc.Height = height;
+	swapChainDesc.BufferDesc.Width = m_windowWidth;
+	swapChainDesc.BufferDesc.Height = m_windowHeight;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
@@ -95,7 +107,9 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 			featureLevels,
 			numFeatureLevels,
 			D3D11_SDK_VERSION,
-			&swapChainDesc, &m_swapChain, &m_device, &m_featureLevel, &m_deviceContext
+			&swapChainDesc, 
+			m_swapChain.GetAddressOf(), m_device.GetAddressOf(),
+			&m_featureLevel, m_deviceContext.GetAddressOf()
 		);
 
 		if (SUCCEEDED(hr))
@@ -111,8 +125,8 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 
 #pragma region Creation of Render Target View
 	// Get pointer to back buffer
-	ID3D11Texture2D* pBackBuffer;
-	hr = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
+	hr = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)pBackBuffer.GetAddressOf());
 
 	if (FAILED(hr))
 	{
@@ -120,18 +134,21 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 		return false;
 	}
 
-	hr = m_device->CreateRenderTargetView(pBackBuffer, NULL, &m_renderTargetView);
+	hr = m_device->CreateRenderTargetView(pBackBuffer.Get(), NULL, m_renderTargetView.GetAddressOf());
 
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to create Render Target View!");
 		return false;
 	}
+	
+	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
+#pragma endregion
 
 #pragma region Describe Depth/Stencil Buffer
 	D3D11_TEXTURE2D_DESC depthStencilBuffer;
-	depthStencilBuffer.Width = width;
-	depthStencilBuffer.Height = height;
+	depthStencilBuffer.Width = m_windowWidth;
+	depthStencilBuffer.Height = m_windowHeight;
 	depthStencilBuffer.MipLevels = 1;
 	depthStencilBuffer.ArraySize = 1;
 	depthStencilBuffer.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -142,22 +159,19 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 	depthStencilBuffer.CPUAccessFlags = 0;
 	depthStencilBuffer.MiscFlags = 0;
 
-	hr = m_device->CreateTexture2D(&depthStencilBuffer, NULL, &m_depthStencilBuffer);
+	hr = m_device->CreateTexture2D(&depthStencilBuffer, NULL, m_depthStencilBuffer.GetAddressOf());
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to create Depth Stencil Buffer!");
 		return false;
 	}
 
-	hr = m_device->CreateDepthStencilView(m_depthStencilBuffer, NULL, &m_depthStencilView);
+	hr = m_device->CreateDepthStencilView(m_depthStencilBuffer.Get(), NULL, m_depthStencilView.GetAddressOf());
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to create Depth Stencil View!");
 		return false;
 	}
-#pragma endregion
-
-	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
 #pragma endregion
 
 #pragma region Create and Set Viewport
@@ -166,8 +180,8 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = width;
-	viewport.Height = height;
+	viewport.Width = static_cast<float>(m_windowWidth);
+	viewport.Height = static_cast<float>(m_windowHeight);
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
@@ -183,7 +197,7 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
-	hr = m_device->CreateDepthStencilState(&depthStencilDesc, &m_depthStencilState);
+	hr = m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilState.GetAddressOf());
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to create Depth Stencil State!");
@@ -198,7 +212,7 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	rasterizerDesc.CullMode = D3D11_CULL_BACK;
 
-	hr = m_device->CreateRasterizerState(&rasterizerDesc, &m_rasterizerState);
+	hr = m_device->CreateRasterizerState(&rasterizerDesc, m_rasterizerState.GetAddressOf());
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to create Rasterizer State!");
@@ -218,7 +232,7 @@ bool Graphics::InitialiseDirectX(HWND hWnd, int width, int height)
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	hr = m_device->CreateSamplerState(&samplerDesc, &m_samplerState);
+	hr = m_device->CreateSamplerState(&samplerDesc, m_samplerState.GetAddressOf());
 	if (FAILED(hr))
 	{
 		return false;
@@ -274,11 +288,19 @@ bool Graphics::InitialiseScene()
 	// Textured Square
 	Vertex v[] =
 	{
-		Vertex(-0.5f, -0.5f, 1.0f, 0.0f, 1.0f), // Bottom Left  - [0]
-		Vertex(-0.5f,  0.5f, 1.0f, 0.0f, 0.0f), // Top Left		- [1]
-		Vertex(0.5f,   0.5f, 1.0f, 1.0f, 0.0f), // Top Right	- [2]
-		Vertex(0.5f,  -0.5f, 1.0f, 1.0f, 1.0f), // Bottom Right	- [3]
+		Vertex(-0.5f, -0.5f, 0.0f, 0.0f, 1.0f), // Bottom Left  - [0]
+		Vertex(-0.5f,  0.5f, 0.0f, 0.0f, 0.0f), // Top Left		- [1]
+		Vertex(0.5f,   0.5f, 0.0f, 1.0f, 0.0f), // Top Right	- [2]
+		Vertex(0.5f,  -0.5f, 0.0f, 1.0f, 1.0f), // Bottom Right	- [3]
 	};
+
+	// Create Vertex Buffer
+	HRESULT hr = m_vertexBuffer.Initialise(m_device.Get(), v, ARRAYSIZE(v));
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create vertex buffer!");
+		return hr;
+	}
 
 	DWORD indices[] =
 	{
@@ -286,40 +308,8 @@ bool Graphics::InitialiseScene()
 		0, 2, 3
 	};
 
-	D3D11_BUFFER_DESC vertexBufferDesc;
-	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
-
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(Vertex) * ARRAYSIZE(v);
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
-	vertexBufferDesc.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA vertexBufferData;
-	ZeroMemory(&vertexBufferData, sizeof(vertexBufferData));
-	vertexBufferData.pSysMem = v;
-
-	HRESULT hr = m_device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_vertexBuffer);
-	if (FAILED(hr))
-	{
-		OutputDebugString("Failed to create vertex buffer!");
-		return hr;
-	}
-
-	D3D11_BUFFER_DESC indexBufferDesc;
-	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
-
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(DWORD) * ARRAYSIZE(indices);
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA indexBufferData;
-	ZeroMemory(&indexBufferData, sizeof(indexBufferData));
-	indexBufferData.pSysMem = indices;
-
-	hr = m_device->CreateBuffer(&indexBufferDesc, &indexBufferData, &m_indicesBuffer);
+	// Create Index Buffer
+	hr = m_indicesBuffer.Initialize(m_device.Get(), indices, ARRAYSIZE(indices));
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to create indices buffer!");
@@ -327,29 +317,22 @@ bool Graphics::InitialiseScene()
 	}
 
 	// Load Texture
-	hr = D3DX11CreateShaderResourceViewFromFile(m_device, "Assets/Textures/LewisPaella.png", NULL, NULL, &m_texture, NULL);
+	hr = D3DX11CreateShaderResourceViewFromFile(m_device.Get(), "Assets/Textures/LewisPaella.png", NULL, NULL, &m_texture, NULL);
 	if (FAILED(hr))
 	{
 		return hr;
 	}
 
-	// Initialise Constant Buffer
-	D3D11_BUFFER_DESC cbDesc;
-	ZeroMemory(&cbDesc, sizeof(cbDesc));
-
-	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
-	cbDesc.MiscFlags = 0;
-	cbDesc.ByteWidth = static_cast<UINT>(sizeof(CB_VertexShader) + (16 - sizeof(CB_VertexShader)));
-	cbDesc.StructureByteStride = 0;
-
-	hr = m_device->CreateBuffer(&cbDesc, NULL, &m_constantBuffer);
+	// Create Constant Buffer
+	hr = m_constantBuffer.Initialize(m_device.Get(), m_deviceContext.Get());
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to create constant buffer!");
 		return hr;
 	}
+
+	m_camera.SetPosition(0.0f, 0.0f, -2.0f);
+	m_camera.SetProjectMatrix(90.0f, static_cast<float>(m_windowWidth) / static_cast<float>(m_windowHeight), 0.1f, 1000.0f);
 
 	return true;
 }

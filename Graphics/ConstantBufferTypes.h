@@ -4,6 +4,5 @@
 // Constant Buffer Vertex Shader
 struct CB_VertexShader
 {
-	float xOffset = 0;
-	float yOffset = 0;
+	DirectX::XMMATRIX mat;
 };
