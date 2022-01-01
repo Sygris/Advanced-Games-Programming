@@ -4,14 +4,17 @@ bool Engine::Initliase(HINSTANCE hInstance, std::string windowTitle, std::string
 {
 	m_timer.Start();
 
-	if(!m_window.Initliase(this, hInstance, windowTitle, windowClass, width, height)) 
+	if (!m_window.Initliase(this, hInstance, windowTitle, windowClass, width, height))
 		return false;
 
 	if (!m_graphics.Initialise(m_window.GetHandler(), width, height))
 		return false;
 
 	m_keyboard = new Keyboard(hInstance, m_window.GetHandler());
-	m_keyboard->InitialiseInput();
+	m_keyboard->Initialise();
+
+	m_mouse = new Mouse(hInstance, m_window.GetHandler());
+	m_mouse->Initialise();
 
 	return true;
 }
@@ -27,6 +30,12 @@ void Engine::Update()
 	m_timer.Restart();
 
 	m_keyboard->ReadInputStates();
+	m_mouse->ReadInputStates();
+
+	if (m_mouse->ButtonDown(0))
+	{
+		m_graphics.m_camera.AdjustRotation((float)m_mouse->GetMousePosY() * 0.005f, (float)m_mouse->GetMousePosX() * 0.001f, 0);
+	}
 
 	if (m_keyboard->IsKeyPreesed(DIK_W))
 	{

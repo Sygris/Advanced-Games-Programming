@@ -159,6 +159,7 @@
     <ClCompile Include="Input\Keyboard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Graphics\Shaders.cpp" />
+    <ClCompile Include="Input\Mouse.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowContainer.cpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="Input\Keyboard.h" />
     <ClInclude Include="Graphics\Shaders.h" />
     <ClInclude Include="Graphics\VertexBuffer.h" />
+    <ClInclude Include="Input\Mouse.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="WindowContainer.h" />

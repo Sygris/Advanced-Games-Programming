@@ -5,18 +5,7 @@ Keyboard::Keyboard(HINSTANCE hInstance, HWND hwnd)
 {
 }
 
-Keyboard::~Keyboard()
-{
-    if (m_keyboardDevice)
-    {
-        m_keyboardDevice->Unacquire();
-        m_keyboardDevice->Release();
-    }
-
-    if (m_directInput) m_directInput->Release();
-}
-
-HRESULT Keyboard::InitialiseInput()
+HRESULT Keyboard::Initialise()
 {
     HRESULT hr;
     ZeroMemory(m_keyboardStates, sizeof(m_keyboardStates));
@@ -37,7 +26,6 @@ HRESULT Keyboard::InitialiseInput()
     if (FAILED(hr)) return hr;
 
     return S_OK;
-
 }
 
 void Keyboard::ReadInputStates()

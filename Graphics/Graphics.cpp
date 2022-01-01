@@ -28,27 +28,33 @@ void Graphics::RenderFrame()
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_deviceContext->RSSetState(m_rasterizerState.Get());
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
+	m_deviceContext->OMSetBlendState(m_blendState.Get(), NULL, 0xFFFFFFFF);
 	m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 	m_deviceContext->VSSetShader(m_vertexShader.GetShader(), NULL, 0);
 	m_deviceContext->PSSetShader(m_pixelShader.GetShader(), NULL, 0);
 
 	UINT offset = 0;
 
-	// Update Constant Buffer
-	XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
+	{ // Grass
+		// Update Constant Buffer
+		XMMATRIX worldMatrix = XMMatrixScaling(5.0f, 5.0f, 5.0f) * DirectX::XMMatrixIdentity();
+		m_cb_vertexShader.data.mat = worldMatrix * m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix();
+		m_cb_vertexShader.data.mat = DirectX::XMMatrixTranspose(m_cb_vertexShader.data.mat);
+		if (!m_cb_vertexShader.ApplyChanges())
+			return;
+		m_deviceContext->VSSetConstantBuffers(0, 1, m_cb_vertexShader.GetAddressOf());
 
-	m_constantBuffer.data.mat = worldMatrix * m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix();
-	m_constantBuffer.data.mat = DirectX::XMMatrixTranspose(m_constantBuffer.data.mat);
-	if (!m_constantBuffer.ApplyChanges())
-		return;
+		m_cb_pixelShader.data.alpha = 1.0f;
+		if (!m_cb_pixelShader.ApplyChanges())
+			return;
+		m_deviceContext->PSSetConstantBuffers(0, 1, m_cb_pixelShader.GetAddressOf());
 
-	m_deviceContext->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
-
-	// Square
-	m_deviceContext->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
-	m_deviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), m_vertexBuffer.StridePtr(), &offset);
-	m_deviceContext->IASetIndexBuffer(m_indicesBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-	m_deviceContext->DrawIndexed(m_indicesBuffer.BufferSize(), 0, 0);
+		// Square
+		m_deviceContext->PSSetShaderResources(0, 1, m_grassTexture.GetAddressOf());
+		m_deviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), m_vertexBuffer.StridePtr(), &offset);
+		m_deviceContext->IASetIndexBuffer(m_indicesBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+		m_deviceContext->DrawIndexed(m_indicesBuffer.BufferSize(), 0, 0);
+	}
 
 	m_swapChain->Present(0, NULL);
 }
@@ -107,7 +113,7 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 			featureLevels,
 			numFeatureLevels,
 			D3D11_SDK_VERSION,
-			&swapChainDesc, 
+			&swapChainDesc,
 			m_swapChain.GetAddressOf(), m_device.GetAddressOf(),
 			&m_featureLevel, m_deviceContext.GetAddressOf()
 		);
@@ -141,7 +147,7 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 		OutputDebugString("Failed to create Render Target View!");
 		return false;
 	}
-	
+
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 #pragma endregion
 
@@ -220,6 +226,31 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 	}
 #pragma endregion 
 
+#pragma region Create Blend State
+	D3D11_BLEND_DESC blendDesc;
+	ZeroMemory(&blendDesc, sizeof(blendDesc));
+
+	D3D11_RENDER_TARGET_BLEND_DESC renderTargetBlendDesc;
+	ZeroMemory(&renderTargetBlendDesc, sizeof(renderTargetBlendDesc));
+
+	renderTargetBlendDesc.BlendEnable = true;
+	renderTargetBlendDesc.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	renderTargetBlendDesc.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	renderTargetBlendDesc.BlendOp = D3D11_BLEND_OP_ADD;
+	renderTargetBlendDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
+	renderTargetBlendDesc.DestBlendAlpha = D3D11_BLEND_ZERO;
+	renderTargetBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	renderTargetBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	blendDesc.RenderTarget[0] = renderTargetBlendDesc;
+
+	hr = m_device->CreateBlendState(&blendDesc, m_blendState.GetAddressOf());
+	if (FAILED(hr))
+	{
+		return false;
+	}
+#pragma endregion
+
 #pragma region Create Sampler state
 	D3D11_SAMPLER_DESC samplerDesc;
 	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
@@ -250,19 +281,19 @@ bool Graphics::InitialiseShaders()
 	// If running from visual studio
 	if (IsDebuggerPresent())
 	{
-		#ifdef _DEBUG // Debug Mode
-			#ifdef _WIN64 //x64
-				shaderFolder = L"x64\\Debug\\";
-			#else //x86 (Win32)
-				shaderFolder = L"Debug\\";
-			#endif
-		#else // Release Mode
-			#ifdef _WIN64 //x64
-					shaderFolder = L"x64\\Release\\";
-			#else //x86 (Win32)
-					shaderFolder = L"Release\\";
-			#endif
-		#endif // DEBUG
+#ifdef _DEBUG // Debug Mode
+#ifdef _WIN64 //x64
+		shaderFolder = L"x64\\Debug\\";
+#else //x86 (Win32)
+		shaderFolder = L"Debug\\";
+#endif
+#else // Release Mode
+#ifdef _WIN64 //x64
+		shaderFolder = L"x64\\Release\\";
+#else //x86 (Win32)
+		shaderFolder = L"Release\\";
+#endif
+#endif // DEBUG
 	}
 #pragma endregion
 
@@ -288,10 +319,15 @@ bool Graphics::InitialiseScene()
 	// Textured Square
 	Vertex v[] =
 	{
-		Vertex(-0.5f, -0.5f, 0.0f, 0.0f, 1.0f), // Bottom Left  - [0]
-		Vertex(-0.5f,  0.5f, 0.0f, 0.0f, 0.0f), // Top Left		- [1]
-		Vertex(0.5f,   0.5f, 0.0f, 1.0f, 0.0f), // Top Right	- [2]
-		Vertex(0.5f,  -0.5f, 0.0f, 1.0f, 1.0f), // Bottom Right	- [3]
+		Vertex(-0.5f, -0.5f, -0.5f, 0.0f, 1.0f), // [FRONT] Bottom Left  - [0]
+		Vertex(-0.5f,  0.5f, -0.5f, 0.0f, 0.0f), // [FRONT] Top Left	 - [1]
+		Vertex(0.5f,   0.5f, -0.5f, 1.0f, 0.0f), // [FRONT] Top Right	 - [2]
+		Vertex(0.5f,  -0.5f, -0.5f, 1.0f, 1.0f), // [FRONT] Bottom Right - [3]
+
+		Vertex(-0.5f, -0.5f, 0.5f, 0.0f, 1.0f),	 // [BACK] Bottom Left  - [0]
+		Vertex(-0.5f,  0.5f, 0.5f, 0.0f, 0.0f),	 // [BACK] Top Left		- [1]
+		Vertex(0.5f,   0.5f, 0.5f, 1.0f, 0.0f),	 // [BACK] Top Right	- [2]
+		Vertex(0.5f,  -0.5f, 0.5f, 1.0f, 1.0f),	 // [BACK] Bottom Right	- [3]
 	};
 
 	// Create Vertex Buffer
@@ -304,8 +340,18 @@ bool Graphics::InitialiseScene()
 
 	DWORD indices[] =
 	{
-		0, 1, 2,
-		0, 2, 3
+		0, 1, 2, //FRONT
+		0, 2, 3, //FRONT
+		4, 7, 6, //BACK 
+		4, 6, 5, //BACK
+		3, 2, 6, //RIGHT SIDE
+		3, 6, 7, //RIGHT SIDE
+		4, 5, 1, //LEFT SIDE
+		4, 1, 0, //LEFT SIDE
+		1, 5, 6, //TOP
+		1, 6, 2, //TOP
+		0, 3, 7, //BOTTOM
+		0, 7, 4, //BOTTOM
 	};
 
 	// Create Index Buffer
@@ -313,22 +359,35 @@ bool Graphics::InitialiseScene()
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to create indices buffer!");
-		return hr;
+		return false;
 	}
 
-	// Load Texture
-	hr = D3DX11CreateShaderResourceViewFromFile(m_device.Get(), "Assets/Textures/LewisPaella.png", NULL, NULL, &m_texture, NULL);
+	// Load Texture(s)
+	hr = D3DX11CreateShaderResourceViewFromFile(m_device.Get(), "Assets/Textures/pinksquare.jpg", NULL, NULL, &m_pinkTexture, NULL);
 	if (FAILED(hr))
 	{
-		return hr;
+		return false;
 	}
 
-	// Create Constant Buffer
-	hr = m_constantBuffer.Initialize(m_device.Get(), m_deviceContext.Get());
+	hr = D3DX11CreateShaderResourceViewFromFile(m_device.Get(), "Assets/Textures/seamless_grass.jpg", NULL, NULL, &m_grassTexture, NULL);
+	if (FAILED(hr))
+	{
+		return false;
+	}
+
+	// Create Constant Buffer(s)
+	hr = m_cb_vertexShader.Initialize(m_device.Get(), m_deviceContext.Get());
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to create constant buffer!");
-		return hr;
+		return false;
+	}
+
+	hr = m_cb_pixelShader.Initialize(m_device.Get(), m_deviceContext.Get());
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create constant buffer!");
+		return false;
 	}
 
 	m_camera.SetPosition(0.0f, 0.0f, -2.0f);

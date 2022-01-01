@@ -1,6 +1,7 @@
 #pragma once
 #include "Window.h"
 #include "Input/Keyboard.h"
+#include "Input/Mouse.h"
 #include "Graphics/Graphics.h"
 
 /// <summary>
@@ -14,6 +15,7 @@ public:
 protected:
 	Window m_window;
 	Keyboard* m_keyboard;
+	Mouse* m_mouse;
 	Graphics m_graphics;
 private:
 

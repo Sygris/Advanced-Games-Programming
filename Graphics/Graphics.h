@@ -39,7 +39,8 @@ private:
 	// Buffers
 	VertexBuffer<Vertex> m_vertexBuffer;
 	IndexBuffer m_indicesBuffer;
-	ConstantBuffer<CB_VertexShader> m_constantBuffer;
+	ConstantBuffer<CB_VertexShader> m_cb_vertexShader;
+	ConstantBuffer<CB_PixelShader> m_cb_pixelShader;
 
 	// Depth and Stencil
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_depthStencilView;
@@ -47,9 +48,15 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState;
 
 	// Rasterizer
-	Microsoft::WRL::ComPtr < ID3D11RasterizerState> m_rasterizerState;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;
+
+	// Blend State
+	Microsoft::WRL::ComPtr<ID3D11BlendState> m_blendState;
 
 	// Sampler State
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerState;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
+
+	// Textures
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pinkTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_grassTexture;
 };

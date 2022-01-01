@@ -9,21 +9,29 @@
 
 #include <wrl/client.h>
 
-class Keyboard
+class Mouse
 {
 public:
-	Keyboard(HINSTANCE hInstance, HWND hwnd);
+	Mouse(HINSTANCE hInstance, HWND hwnd);
 
 	HRESULT Initialise();
 	void ReadInputStates();
-	bool IsKeyPreesed(unsigned char keycode);
+
+	bool ButtonDown(int button) const;
+	const int GetMousePosX() const;
+	const int GetMousePosY() const;
+	const int GetMouseWheel() const;
 private:
 	HINSTANCE m_hInst;
 	HWND m_hwnd;
 
 	Microsoft::WRL::ComPtr<IDirectInput8> m_directInput;
-	
-	Microsoft::WRL::ComPtr<IDirectInputDevice8> m_keyboardDevice;
-	unsigned char m_keyboardStates[256];
+
+	Microsoft::WRL::ComPtr<IDirectInputDevice8> m_mouseDevice;
+	DIMOUSESTATE m_mouseState = {};
+	int m_mousePosX  = 0;
+	int m_mousePosY  = 0;
+	int m_mouseWheel = 0;;
 };
+
 

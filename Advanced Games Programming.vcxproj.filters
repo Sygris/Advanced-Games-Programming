@@ -13,17 +13,17 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Keyboard">
-      <UniqueIdentifier>{29b684c5-42ce-4f0d-8e8f-ff7bc0ce9da0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Keyboard">
-      <UniqueIdentifier>{ab7be0f9-aac1-4221-b54a-0b320ee0c6ec}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Graphics">
       <UniqueIdentifier>{d990ad42-6a91-4e93-ab48-43b7e83b9383}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{c4d7b06d-b18f-445c-831b-08be4a79702d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Input">
+      <UniqueIdentifier>{29b684c5-42ce-4f0d-8e8f-ff7bc0ce9da0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Input">
+      <UniqueIdentifier>{ab7be0f9-aac1-4221-b54a-0b320ee0c6ec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -40,7 +40,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Input\Keyboard.cpp">
-      <Filter>Source Files\Keyboard</Filter>
+      <Filter>Source Files\Input</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Graphics.cpp">
       <Filter>Source Files\Graphics</Filter>
@@ -54,6 +54,9 @@
     <ClCompile Include="Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Input\Mouse.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -66,7 +69,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Input\Keyboard.h">
-      <Filter>Header Files\Keyboard</Filter>
+      <Filter>Header Files\Input</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Graphics.h">
       <Filter>Header Files\Graphics</Filter>
@@ -94,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\Mouse.h">
+      <Filter>Header Files\Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
