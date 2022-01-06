@@ -1,17 +1,22 @@
 #pragma once
-#include <DirectXMath.h>
-// I decided to use the namespace to speed up and
-// avoid having to write DirectX:: multiple times
+#include "Vertex.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "ConstantBuffer.h"
+#include "Shaders.h"
+#include <wrl/client.h>
+#include "../Util/objfilemodel.h"
+
 using namespace DirectX;
 
-class Camera
+class Model
 {
 public:
-	Camera();
-	void SetProjectMatrix(float fovDegrees, float aspectRation, float nearZ, float farZ);
+	bool Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VertexShader>& cbVertexShader);
+	void SetTexture(ID3D11ShaderResourceView* texture);
+	void Draw(const XMMATRIX& viewProjectionMatrix);
 
-	const XMMATRIX& GetViewMatrix() const;
-	const XMMATRIX& GetProjectionMatrix() const;
+	bool LoadObjModel(char* filename);
 
 	// Get Position and Rotation (Returns a vector or a float3)
 	const XMVECTOR& GetPositionVector() const;
@@ -23,7 +28,7 @@ public:
 	void SetPosition(const XMVECTOR& position);
 	void SetPosition(const XMFLOAT3& position);
 	void SetPosition(float x, float y, float z);
-	
+
 	// Set Rotation (Can use XMVECTOR, XMFLOAT3 or each individual component)
 	void SetRotation(const XMVECTOR& rotation);
 	void SetRotation(const XMFLOAT3& rotation);
@@ -33,7 +38,7 @@ public:
 	void AdjustPosition(const XMVECTOR& position);
 	void AdjustPosition(const XMFLOAT3& position);
 	void AdjustPosition(float x, float y, float z);
-	
+
 	// Adjust Rotation (Can use XMVECTOR, XMFLOAT3 or each individual component)
 	void AdjustRotation(const XMVECTOR& rotation);
 	void AdjustRotation(const XMFLOAT3& rotation);
@@ -48,7 +53,21 @@ public:
 	const XMVECTOR& GetBackwardVector();
 	const XMVECTOR& GetLeftVector();
 private:
-	void UpdateViewMatrix();
+	void UpdateWorldMatrix();
+
+	ObjFileModel* m_objFileModel;
+	VertexShader m_vertexShader;
+	PixelShader m_pixelShader;
+
+	Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deviceContext = nullptr;
+	ConstantBuffer<CB_VertexShader>* m_cbVertexShader = nullptr;
+	ID3D11ShaderResourceView* m_texture = nullptr;
+
+	VertexBuffer<Vertex> m_vertexBuffer;
+	IndexBuffer m_indexBuffer;
+
+	XMMATRIX worldMatrix = XMMatrixIdentity();
 
 	// VECTORS
 	XMVECTOR m_positionVector;
@@ -59,14 +78,10 @@ private:
 	XMVECTOR m_leftVector;
 	XMVECTOR m_rightVector;
 	XMVECTOR m_backwardVector;
-	
+
 	// FLOAT3
 	XMFLOAT3 m_position;
 	XMFLOAT3 m_rotation;
-
-	// MATRICES
-	XMMATRIX m_viewMatrix;
-	XMMATRIX m_projectionMatrix;
 
 	// Default Vectors
 	const XMVECTOR DEFAULT_FORWARD_VECTOR = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);

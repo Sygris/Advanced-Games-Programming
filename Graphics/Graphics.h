@@ -2,11 +2,8 @@
 #include <d3d11.h>
 #include <wrl/client.h> // ComPtr
 #include "Shaders.h"
-#include "Vertex.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "ConstantBuffer.h"
 #include "Camera.h"
+#include "Model.h"
 
 class Graphics
 {
@@ -15,6 +12,7 @@ public:
 	void RenderFrame();
 
 	Camera m_camera;
+	Model m_model;
 private:
 	bool InitialiseDirectX(HWND hWnd);
 	bool InitialiseShaders();
@@ -37,8 +35,6 @@ private:
 	PixelShader m_pixelShader;
 
 	// Buffers
-	VertexBuffer<Vertex> m_vertexBuffer;
-	IndexBuffer m_indicesBuffer;
 	ConstantBuffer<CB_VertexShader> m_cb_vertexShader;
 	ConstantBuffer<CB_PixelShader> m_cb_pixelShader;
 

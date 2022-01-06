@@ -32,6 +32,8 @@ void Engine::Update()
 	m_keyboard->ReadInputStates();
 	m_mouse->ReadInputStates();
 
+	m_graphics.m_model.AdjustRotation(0.0f, 0.001f * deltaTime, 0.0f);
+
 	if (m_mouse->ButtonDown(0))
 	{
 		m_graphics.m_camera.AdjustRotation((float)m_mouse->GetMousePosY() * 0.005f, (float)m_mouse->GetMousePosX() * 0.001f, 0);
@@ -55,6 +57,15 @@ void Engine::Update()
 	if (m_keyboard->IsKeyPreesed(DIK_D))
 	{
 		m_graphics.m_camera.AdjustPosition(m_graphics.m_camera.GetRightVector() * 0.01f * deltaTime);
+	}
+
+	if (m_keyboard->IsKeyPreesed(DIK_SPACE))
+	{
+		this->m_graphics.m_camera.AdjustPosition(0.0f, 0.01f * deltaTime, 0.0f);
+	}
+	if (m_keyboard->IsKeyPreesed(DIK_Z))
+	{
+		this->m_graphics.m_camera.AdjustPosition(0.0f, -0.01f * deltaTime, 0.0f);
 	}
 }
 

@@ -160,7 +160,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Graphics\Shaders.cpp" />
     <ClCompile Include="Input\Mouse.cpp" />
+    <ClCompile Include="Graphics\Model.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="Util\objfilemodel.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowContainer.cpp" />
   </ItemGroup>
@@ -176,11 +178,23 @@
     <ClInclude Include="Graphics\Shaders.h" />
     <ClInclude Include="Graphics\VertexBuffer.h" />
     <ClInclude Include="Input\Mouse.h" />
+    <ClInclude Include="Graphics\Model.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Util\objfilemodel.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="WindowContainer.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="ModelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
