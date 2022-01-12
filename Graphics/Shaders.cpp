@@ -1,4 +1,5 @@
 #include "Shaders.h"
+#include <D3DX11.h>
 
 #pragma region Vertex Shader
 bool VertexShader::Initialise(Microsoft::WRL::ComPtr<ID3D11Device>& device, std::wstring shaderPath, D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numOfElements)
@@ -7,7 +8,6 @@ bool VertexShader::Initialise(Microsoft::WRL::ComPtr<ID3D11Device>& device, std:
 	if (FAILED(hr))
 	{
 		OutputDebugString("Failed to load Vertex Shader\n");
-
 		return false;
 	}
 

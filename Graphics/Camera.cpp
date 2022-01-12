@@ -227,8 +227,8 @@ void Camera::UpdateViewMatrix()
 	m_viewMatrix = XMMatrixLookAtLH(m_positionVector, cameraTarget, upDirection);
 
 	XMMATRIX vecRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, m_rotation.y, 0.0f);
-	m_forwardVector = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, vecRotationMatrix);
-	m_backwardVector = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, vecRotationMatrix);
-	m_leftVector = XMVector3TransformCoord(this->DEFAULT_LEFT_VECTOR, vecRotationMatrix);
-	m_rightVector = XMVector3TransformCoord(this->DEFAULT_RIGHT_VECTOR, vecRotationMatrix);
+	m_forwardVector = XMVector3TransformCoord(DEFAULT_FORWARD_VECTOR, vecRotationMatrix);
+	m_backwardVector = XMVector3TransformCoord(DEFAULT_BACKWARD_VECTOR, vecRotationMatrix);
+	m_leftVector = XMVector3TransformCoord(DEFAULT_LEFT_VECTOR, vecRotationMatrix);
+	m_rightVector = XMVector3TransformCoord(DEFAULT_RIGHT_VECTOR, vecRotationMatrix);
 }

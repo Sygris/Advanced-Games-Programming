@@ -11,7 +11,7 @@ struct VOut
     float3 normal : NORMAL;
 };
 
-VOut ModelVs(float4 position : POSITION, float2 texCoord : TEXCOORD, float3 normal : NORMAL)
+VOut main(float4 position : POSITION, float2 texCoord : TEXCOORD, float3 normal : NORMAL)
 {
     VOut output;
     

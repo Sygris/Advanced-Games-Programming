@@ -285,7 +285,6 @@ bool Graphics::InitialiseShaders()
 	};
 
 	UINT numOfLayout = ARRAYSIZE(layout);
-
 	if (!m_vertexShader.Initialise(m_device, shaderFolder + L"VertexShader.cso", layout, numOfLayout))
 		return false;
 
@@ -329,6 +328,12 @@ bool Graphics::InitialiseScene()
 
 	// Initialise Model
 	if (!m_model.Initialise(m_device.Get(), m_deviceContext.Get(), m_grassTexture.Get(), m_cb_vertexShader))
+		return false;
+
+	if (!m_model.LoadObjModel((char*)"Assets/Models/Sphere.obj"))
+		return false;
+
+	if (!m_model.AddTexture((char*)"Assets/Textures/LewisPaella.png"))
 		return false;
 
 	m_camera.SetPosition(0.0f, 0.0f, -2.0f);

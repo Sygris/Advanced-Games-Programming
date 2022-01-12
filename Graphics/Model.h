@@ -17,6 +17,7 @@ public:
 	void Draw(const XMMATRIX& viewProjectionMatrix);
 
 	bool LoadObjModel(char* filename);
+	bool AddTexture(char* filename);
 
 	// Get Position and Rotation (Returns a vector or a float3)
 	const XMVECTOR& GetPositionVector() const;

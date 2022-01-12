@@ -7,56 +7,6 @@ bool Model::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
     m_texture = texture;
     m_cbVertexShader = &cbVertexShader;
 
-#pragma region Initialise Vertex Buffer
-    //Textured Square
-    Vertex v[] =
-    {
-        Vertex(-0.5f,  -0.5f, -0.5f, 0.0f, 1.0f), //FRONT Bottom Left   - [0]
-        Vertex(-0.5f,   0.5f, -0.5f, 0.0f, 0.0f), //FRONT Top Left      - [1]
-        Vertex(0.5f,   0.5f, -0.5f, 1.0f, 0.0f),  //FRONT Top Right     - [2]
-        Vertex(0.5f,  -0.5f, -0.5f, 1.0f, 1.0f),  //FRONT Bottom Right   - [3]
-        Vertex(-0.5f,  -0.5f, 0.5f, 0.0f, 1.0f),  //BACK Bottom Left   - [4]
-        Vertex(-0.5f,   0.5f, 0.5f, 0.0f, 0.0f),  //BACK Top Left      - [5]
-        Vertex(0.5f,   0.5f, 0.5f, 1.0f, 0.0f),   //BACK Top Right     - [6]
-        Vertex(0.5f,  -0.5f, 0.5f, 1.0f, 1.0f),   //BACK Bottom Right   - [7]
-    };
-
-    //Load Vertex Data
-    HRESULT hr = m_vertexBuffer.Initialise(m_device.Get(), v, ARRAYSIZE(v));
-    if (FAILED(hr))
-    {
-        OutputDebugString("FAILED INITIALISING MODEL!\n");
-        return false;
-    }
-
-    DWORD indices[] =
-    {
-        0, 1, 2, //FRONT
-        0, 2, 3, //FRONT
-        4, 7, 6, //BACK 
-        4, 6, 5, //BACK
-        3, 2, 6, //RIGHT SIDE
-        3, 6, 7, //RIGHT SIDE
-        4, 5, 1, //LEFT SIDE
-        4, 1, 0, //LEFT SIDE
-        1, 5, 6, //TOP
-        1, 6, 2, //TOP
-        0, 3, 7, //BOTTOM
-        0, 7, 4, //BOTTOM
-    };
-
-#pragma endregion 
-
-#pragma region Initialise Index Buffer
-    //Load Index Data
-    hr = m_indexBuffer.Initialize(m_device.Get(), indices, ARRAYSIZE(indices));
-    if (FAILED(hr))
-    {
-        OutputDebugString("FAILED INITIALISING MODEL!\n");
-        return false;
-    }
-#pragma endregion 
-
 	SetPosition(0.0f, 0.0f, 0.0f);
 	SetRotation(0.0f, 0.0f, 0.0f);
 
@@ -78,15 +28,20 @@ void Model::Draw(const XMMATRIX& viewProjectionMatrix)
     m_deviceContext->VSSetConstantBuffers(0, 1, m_cbVertexShader->GetAddressOf());
 
     m_deviceContext->PSSetShaderResources(0, 1, &m_texture);
-    m_deviceContext->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-    UINT offset = 0;
-    m_deviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), m_vertexBuffer.StridePtr(), &offset);
-    m_deviceContext->DrawIndexed(m_indexBuffer.BufferSize(), 0, 0);
+	m_objFileModel->Draw();
 }
 
 bool Model::LoadObjModel(char* filename)
 {
+	//Load new model
+	if (m_objFileModel == nullptr)
+	{
+		m_objFileModel = new ObjFileModel(filename, m_device.Get(), m_deviceContext.Get());
+		if (m_objFileModel->filename == "FILE NOT LOADED") 
+			return S_FALSE;
+	}
+
 #pragma region Determine Shader Path (Change it to a better solution in the future)
 	std::wstring shaderFolder = L"";
 
@@ -123,6 +78,17 @@ bool Model::LoadObjModel(char* filename)
 		return false;
 
 	if (!m_pixelShader.Initialise(m_device, shaderFolder + L"PixelShader.cso"))
+		return false;
+
+	return true;
+}
+
+bool Model::AddTexture(char* filename)
+{
+	HRESULT hr;
+
+	hr = D3DX11CreateShaderResourceViewFromFile(m_device.Get(), filename, NULL, NULL, &m_texture, NULL);
+	if (FAILED(hr))
 		return false;
 
 	return true;
