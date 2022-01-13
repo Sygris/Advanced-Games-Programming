@@ -30,6 +30,8 @@ void Graphics::RenderFrame()
 	m_model1.Draw(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
 	m_model.Draw(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
 
+	m_text->RenderText();
+
 	m_swapChain->Present(0, NULL);
 }
 
@@ -154,37 +156,6 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 	}
 #pragma endregion
 
-#pragma region Create and Set Viewport
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = static_cast<float>(m_windowWidth);
-	viewport.Height = static_cast<float>(m_windowHeight);
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-
-	// Set viewport
-	m_deviceContext->RSSetViewports(1, &viewport);
-#pragma endregion
-
-#pragma region Create Depth Stencil State
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
-
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
-	hr = m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilState.GetAddressOf());
-	if (FAILED(hr))
-	{
-		OutputDebugString("Failed to create Depth Stencil State!");
-		return false;
-	}
-#pragma endregion
-
 #pragma region Create Rasterizer State
 	D3D11_RASTERIZER_DESC rasterizerDesc;
 	ZeroMemory(&rasterizerDesc, sizeof(rasterizerDesc));
@@ -251,6 +222,37 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 	}
 #pragma endregion
 
+#pragma region Create Depth Stencil State
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	hr = m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilState.GetAddressOf());
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create Depth Stencil State!");
+		return false;
+	}
+#pragma endregion
+
+#pragma region Create and Set Viewport
+	D3D11_VIEWPORT viewport;
+	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = static_cast<float>(m_windowWidth);
+	viewport.Height = static_cast<float>(m_windowHeight);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+
+	// Set viewport
+	m_deviceContext->RSSetViewports(1, &viewport);
+#pragma endregion
+
 	return true;
 }
 
@@ -277,13 +279,15 @@ bool Graphics::InitialiseScene()
 	if (!m_model.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/LewisPaella.png", m_cb_vertexShader))
 		return false;
 
-	if (!m_model1.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/cube.obj", "Assets/Textures/LewisPaella.png", m_cb_vertexShader))
+	if (!m_model1.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Camera.obj", "Assets/Textures/LewisPaella.png", m_cb_vertexShader))
 		return false;
 
 	m_camera.SetPosition(0.0f, 0.0f, -5.0f);
 	m_camera.SetProjectMatrix(90.0f, static_cast<float>(m_windowWidth) / static_cast<float>(m_windowHeight), 0.1f, 1000.0f);
 
 	m_model1.SetPosition(-5.0f, 0.0f, 0.0f);
+
+	m_text = new Text2D("Assets/Fonts/font1.png", m_device.Get(), m_deviceContext.Get());
 
 	return true;
 }

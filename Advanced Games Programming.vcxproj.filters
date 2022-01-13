@@ -31,6 +31,12 @@
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{9df4d54a-eab4-463b-b673-a0431a002dac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\UI">
+      <UniqueIdentifier>{d2677875-dd41-4681-a2dc-5eb8629f7856}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI">
+      <UniqueIdentifier>{ad367542-8741-4c8c-b189-25a3361daa95}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -68,6 +74,9 @@
     </ClCompile>
     <ClCompile Include="Util\objfilemodel.cpp">
       <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\text2D.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +128,9 @@
     <ClInclude Include="Util\objfilemodel.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="UI\text2D.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -128,6 +140,9 @@
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="text2D_shaders.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

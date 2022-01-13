@@ -161,6 +161,7 @@
     <ClCompile Include="Graphics\Shaders.cpp" />
     <ClCompile Include="Input\Mouse.cpp" />
     <ClCompile Include="Graphics\Model.cpp" />
+    <ClCompile Include="UI\text2D.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Util\objfilemodel.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="Graphics\VertexBuffer.h" />
     <ClInclude Include="Input\Mouse.h" />
     <ClInclude Include="Graphics\Model.h" />
+    <ClInclude Include="UI\text2D.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Util\objfilemodel.h" />
     <ClInclude Include="Window.h" />
@@ -200,6 +202,20 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="text2D_shaders.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TextVS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TextVS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TextVS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TextVS</EntryPointName>
     </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>

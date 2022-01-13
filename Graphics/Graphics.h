@@ -4,6 +4,7 @@
 #include "Shaders.h"
 #include "Camera.h"
 #include "Model.h"
+#include "../UI/text2D.h"
 
 class Graphics
 {
@@ -14,6 +15,9 @@ public:
 	Camera m_camera;
 	Model m_model;
 	Model m_model1;
+
+	Text2D* m_text = nullptr;
+
 private:
 	bool InitialiseDirectX(HWND hWnd);
 	bool InitialiseScene();

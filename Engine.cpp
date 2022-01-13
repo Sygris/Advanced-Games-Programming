@@ -61,12 +61,14 @@ void Engine::Update()
 
 	if (m_keyboard->IsKeyPreesed(DIK_SPACE))
 	{
-		this->m_graphics.m_camera.AdjustPosition(0.0f, 0.01f * deltaTime, 0.0f);
+		m_graphics.m_camera.AdjustPosition(0.0f, 0.01f * deltaTime, 0.0f);
 	}
 	if (m_keyboard->IsKeyPreesed(DIK_Z))
 	{
-		this->m_graphics.m_camera.AdjustPosition(0.0f, -0.01f * deltaTime, 0.0f);
+		m_graphics.m_camera.AdjustPosition(0.0f, -0.01f * deltaTime, 0.0f);
 	}
+
+	m_graphics.m_text->AddText("Tiago", 0.0f, 0.0f, 0.1f);
 }
 
 void Engine::RenderFrame()
