@@ -36,7 +36,7 @@ void Engine::Update()
 
 	if (m_mouse->ButtonDown(0))
 	{
-		m_graphics.m_camera.AdjustRotation((float)m_mouse->GetMousePosY() * 0.005f, (float)m_mouse->GetMousePosX() * 0.001f, 0);
+		m_graphics.m_camera.AdjustRotation((float)m_mouse->GetMousePosY() * 0.005f, (float)m_mouse->GetMousePosX() * 0.005f, 0);
 	}
 
 	if (m_keyboard->IsKeyPreesed(DIK_W))

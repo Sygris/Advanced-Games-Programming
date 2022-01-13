@@ -9,9 +9,6 @@ bool Graphics::Initialise(HWND hWnd, int width, int height)
 	if (!InitialiseDirectX(hWnd))
 		return false;
 
-	if (!InitialiseShaders())
-		return false;
-
 	if (!InitialiseScene())
 		return false;
 
@@ -24,18 +21,14 @@ void Graphics::RenderFrame()
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView.Get(), bgcolor);
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	m_deviceContext->IASetInputLayout(m_vertexShader.GetInputLayout());
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_deviceContext->RSSetState(m_rasterizerState.Get());
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
-	m_deviceContext->OMSetBlendState(NULL, NULL, 0xFFFFFFFF);
+	//m_deviceContext->OMSetBlendState(NULL, NULL, 0xFFFFFFFF);
 	m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
-	m_deviceContext->VSSetShader(m_vertexShader.GetShader(), NULL, 0);
-	m_deviceContext->PSSetShader(m_pixelShader.GetShader(), NULL, 0);
 
-	UINT offset = 0;
-
-	m_model.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
+	m_model1.Draw(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
+	m_model.Draw(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
 
 	m_swapChain->Present(0, NULL);
 }
@@ -182,7 +175,7 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
 
 	hr = m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilState.GetAddressOf());
 	if (FAILED(hr))
@@ -198,6 +191,13 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	rasterizerDesc.CullMode = D3D11_CULL_BACK;
+	rasterizerDesc.FrontCounterClockwise = false;
+	rasterizerDesc.DepthBias = false;
+	rasterizerDesc.DepthBiasClamp = 0;
+	rasterizerDesc.SlopeScaledDepthBias = 0;
+	rasterizerDesc.DepthClipEnable = true;
+	rasterizerDesc.MultisampleEnable = true;
+	rasterizerDesc.AntialiasedLineEnable = true;
 
 	hr = m_device->CreateRasterizerState(&rasterizerDesc, m_rasterizerState.GetAddressOf());
 	if (FAILED(hr))
@@ -254,63 +254,10 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 	return true;
 }
 
-bool Graphics::InitialiseShaders()
-{
-#pragma region Determine Shader Path (Change it to a better solution in the future)
-	std::wstring shaderFolder = L"";
-
-	// If running from visual studio
-	if (IsDebuggerPresent())
-	{
-#ifdef _DEBUG // Debug Mode
-#ifdef _WIN64 //x64
-		shaderFolder = L"x64\\Debug\\";
-#else //x86 (Win32)
-		shaderFolder = L"Debug\\";
-#endif
-#else // Release Mode
-#ifdef _WIN64 //x64
-		shaderFolder = L"x64\\Release\\";
-#else //x86 (Win32)
-		shaderFolder = L"Release\\";
-#endif
-#endif // DEBUG
-	}
-#pragma endregion
-
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	};
-
-	UINT numOfLayout = ARRAYSIZE(layout);
-	if (!m_vertexShader.Initialise(m_device, shaderFolder + L"VertexShader.cso", layout, numOfLayout))
-		return false;
-
-	if (!m_pixelShader.Initialise(m_device, shaderFolder + L"PixelShader.cso"))
-		return false;
-
-	return true;
-}
-
 bool Graphics::InitialiseScene()
 {
 	HRESULT hr;
-
-	// Load Texture(s)
-	hr = D3DX11CreateShaderResourceViewFromFile(m_device.Get(), "Assets/Textures/pinksquare.jpg", NULL, NULL, &m_pinkTexture, NULL);
-	if (FAILED(hr))
-	{
-		return false;
-	}
-
-	hr = D3DX11CreateShaderResourceViewFromFile(m_device.Get(), "Assets/Textures/seamless_grass.jpg", NULL, NULL, &m_grassTexture, NULL);
-	if (FAILED(hr))
-	{
-		return false;
-	}
-
+	
 	// Create Constant Buffer(s)
 	hr = m_cb_vertexShader.Initialize(m_device.Get(), m_deviceContext.Get());
 	if (FAILED(hr))
@@ -327,17 +274,16 @@ bool Graphics::InitialiseScene()
 	}
 
 	// Initialise Model
-	if (!m_model.Initialise(m_device.Get(), m_deviceContext.Get(), m_grassTexture.Get(), m_cb_vertexShader))
+	if (!m_model.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/LewisPaella.png", m_cb_vertexShader))
 		return false;
 
-	if (!m_model.LoadObjModel((char*)"Assets/Models/Sphere.obj"))
+	if (!m_model1.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/cube.obj", "Assets/Textures/LewisPaella.png", m_cb_vertexShader))
 		return false;
 
-	if (!m_model.AddTexture((char*)"Assets/Textures/LewisPaella.png"))
-		return false;
-
-	m_camera.SetPosition(0.0f, 0.0f, -2.0f);
+	m_camera.SetPosition(0.0f, 0.0f, -5.0f);
 	m_camera.SetProjectMatrix(90.0f, static_cast<float>(m_windowWidth) / static_cast<float>(m_windowHeight), 0.1f, 1000.0f);
+
+	m_model1.SetPosition(-5.0f, 0.0f, 0.0f);
 
 	return true;
 }

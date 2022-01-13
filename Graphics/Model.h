@@ -12,12 +12,12 @@ using namespace DirectX;
 class Model
 {
 public:
-	bool Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VertexShader>& cbVertexShader);
+	bool Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, ConstantBuffer<CB_VS_Model>& cbVertexShader);
 	void SetTexture(ID3D11ShaderResourceView* texture);
-	void Draw(const XMMATRIX& viewProjectionMatrix);
+	void Draw(const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix);
 
-	bool LoadObjModel(char* filename);
-	bool AddTexture(char* filename);
+	bool LoadObjModel(const char* filename);
+	bool AddTexture(const char* filename);
 
 	// Get Position and Rotation (Returns a vector or a float3)
 	const XMVECTOR& GetPositionVector() const;
@@ -62,7 +62,7 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deviceContext = nullptr;
-	ConstantBuffer<CB_VertexShader>* m_cbVertexShader = nullptr;
+	ConstantBuffer<CB_VS_Model>* m_cbVertexShader = nullptr;
 	ID3D11ShaderResourceView* m_texture = nullptr;
 
 	VertexBuffer<Vertex> m_vertexBuffer;

@@ -1,16 +1,19 @@
 #include "Model.h"
 
-bool Model::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VertexShader>& cbVertexShader)
+bool Model::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, ConstantBuffer<CB_VS_Model>& cbVertexShader)
 {
     m_device = device;
     m_deviceContext = deviceContext;
-    m_texture = texture;
     m_cbVertexShader = &cbVertexShader;
 
 	SetPosition(0.0f, 0.0f, 0.0f);
 	SetRotation(0.0f, 0.0f, 0.0f);
 
+	LoadObjModel(objPath);
+	AddTexture(texturePath);
+
     UpdateWorldMatrix();
+
     return true;
 }
 
@@ -19,25 +22,36 @@ void Model::SetTexture(ID3D11ShaderResourceView* texture)
     m_texture = texture;
 }
 
-void Model::Draw(const XMMATRIX& viewProjectionMatrix)
+void Model::Draw(const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix)
 {
-    // Update Constant Buffer with World View Projection Matrix
-    m_cbVertexShader->data.mat = worldMatrix * viewProjectionMatrix;
-    m_cbVertexShader->data.mat = XMMatrixTranspose(m_cbVertexShader->data.mat);
-    m_cbVertexShader->ApplyChanges();
-    m_deviceContext->VSSetConstantBuffers(0, 1, m_cbVertexShader->GetAddressOf());
+	XMMATRIX transpose;
 
+	m_deviceContext->IASetInputLayout(m_vertexShader.GetInputLayout());
+	m_deviceContext->VSSetShader(m_vertexShader.GetShader(), NULL, 0);
+	m_deviceContext->PSSetShader(m_pixelShader.GetShader(), NULL, 0);
+
+    // Update Constant Buffer with World View Projection Matrix
+    m_cbVertexShader->data.worldViewProjection = worldMatrix * viewMatrix * projectionMatrix;
+    m_cbVertexShader->data.worldViewProjection = XMMatrixTranspose(m_cbVertexShader->data.worldViewProjection);
+	transpose = XMMatrixTranspose(worldMatrix);
+	m_cbVertexShader->data.ambientLightColour = XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f);
+	m_cbVertexShader->data.directionalLightColour = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	m_cbVertexShader->data.directionalLightVector = XMVector3Transform(XMVectorSet(-0.5f, -0.5f, 1.0f, 0.0f), transpose);
+	m_cbVertexShader->data.directionalLightVector = XMVector3Normalize(m_cbVertexShader->data.directionalLightVector);
+    m_cbVertexShader->ApplyChanges();
+
+    m_deviceContext->VSSetConstantBuffers(0, 1, m_cbVertexShader->GetAddressOf());
     m_deviceContext->PSSetShaderResources(0, 1, &m_texture);
 
 	m_objFileModel->Draw();
 }
 
-bool Model::LoadObjModel(char* filename)
+bool Model::LoadObjModel(const char* filename)
 {
 	//Load new model
 	if (m_objFileModel == nullptr)
 	{
-		m_objFileModel = new ObjFileModel(filename, m_device.Get(), m_deviceContext.Get());
+		m_objFileModel = new ObjFileModel((char*)filename, m_device.Get(), m_deviceContext.Get());
 		if (m_objFileModel->filename == "FILE NOT LOADED") 
 			return S_FALSE;
 	}
@@ -67,9 +81,9 @@ bool Model::LoadObjModel(char* filename)
 	D3D11_INPUT_ELEMENT_DESC iedesc[] =
 	{
 		//Be very careful setting the correct dxgi format and D3D version
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
-		{"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
-		{"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0}
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
 	UINT numOfLayout = ARRAYSIZE(iedesc);
@@ -83,7 +97,7 @@ bool Model::LoadObjModel(char* filename)
 	return true;
 }
 
-bool Model::AddTexture(char* filename)
+bool Model::AddTexture(const char* filename)
 {
 	HRESULT hr;
 

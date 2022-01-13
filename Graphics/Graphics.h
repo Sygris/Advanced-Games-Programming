@@ -13,9 +13,9 @@ public:
 
 	Camera m_camera;
 	Model m_model;
+	Model m_model1;
 private:
 	bool InitialiseDirectX(HWND hWnd);
-	bool InitialiseShaders();
 	bool InitialiseScene();
 
 	// Window Dimensions
@@ -30,12 +30,8 @@ private:
 	D3D_DRIVER_TYPE m_driverType = D3D_DRIVER_TYPE_NULL;
 	D3D_FEATURE_LEVEL m_featureLevel = D3D_FEATURE_LEVEL_11_0;
 
-	// Shaders
-	VertexShader m_vertexShader;
-	PixelShader m_pixelShader;
-
 	// Buffers
-	ConstantBuffer<CB_VertexShader> m_cb_vertexShader;
+	ConstantBuffer<CB_VS_Model> m_cb_vertexShader;
 	ConstantBuffer<CB_PixelShader> m_cb_pixelShader;
 
 	// Depth and Stencil
@@ -51,8 +47,4 @@ private:
 
 	// Sampler State
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerState;
-
-	// Textures
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pinkTexture;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_grassTexture;
 };
