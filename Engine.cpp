@@ -68,7 +68,7 @@ void Engine::Update()
 		m_graphics.m_camera.AdjustPosition(0.0f, -0.01f * deltaTime, 0.0f);
 	}
 
-	m_graphics.m_text->AddText("Tiago", 0.0f, 0.0f, 0.1f);
+	m_graphics.m_text->AddText("Tiago", -0.95f, 0.95f, 0.1f);
 }
 
 void Engine::RenderFrame()

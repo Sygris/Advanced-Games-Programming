@@ -2,7 +2,7 @@
 #include <D3DX11.h>
 
 #pragma region Vertex Shader
-bool VertexShader::Initialise(Microsoft::WRL::ComPtr<ID3D11Device>& device, std::wstring shaderPath, D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numOfElements)
+bool VertexShader::Initialise(ID3D11Device* device, std::wstring shaderPath, D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numOfElements)
 {
 	HRESULT hr = D3DReadFileToBlob(shaderPath.c_str(), m_shaderBuffer.GetAddressOf());
 	if (FAILED(hr))
@@ -45,7 +45,7 @@ ID3D11InputLayout* VertexShader::GetInputLayout()
 #pragma endregion
 
 #pragma region Pixel Shader
-bool PixelShader::Initialise(Microsoft::WRL::ComPtr<ID3D11Device>& device, std::wstring shaderPath)
+bool PixelShader::Initialise(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = D3DReadFileToBlob(shaderPath.c_str(), m_shaderBuffer.GetAddressOf());
 	if (FAILED(hr))

@@ -37,6 +37,18 @@
     <Filter Include="Source Files\UI">
       <UniqueIdentifier>{ad367542-8741-4c8c-b189-25a3361daa95}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Light">
+      <UniqueIdentifier>{e7f4b044-9a13-4bb7-b170-139005a336aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Light">
+      <UniqueIdentifier>{b4a3df9d-b539-4ba4-8305-b7a107e38994}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Entities">
+      <UniqueIdentifier>{85af73bb-bded-411d-895d-da5299307190}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Entities">
+      <UniqueIdentifier>{dc9ce160-27d9-4817-9e1a-8ce43abd650b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -77,6 +89,9 @@
     </ClCompile>
     <ClCompile Include="UI\text2D.cpp">
       <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\GameObject.cpp">
+      <Filter>Source Files\Entities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -130,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="UI\text2D.h">
       <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\GameObject.h">
+      <Filter>Header Files\Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

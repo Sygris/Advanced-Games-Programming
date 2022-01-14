@@ -1,5 +1,4 @@
 #include "Graphics.h"
-#include <D3DX11.h>
 
 bool Graphics::Initialise(HWND hWnd, int width, int height)
 {
@@ -24,11 +23,10 @@ void Graphics::RenderFrame()
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_deviceContext->RSSetState(m_rasterizerState.Get());
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
-	//m_deviceContext->OMSetBlendState(NULL, NULL, 0xFFFFFFFF);
 	m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 
-	m_model1.Draw(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
-	m_model.Draw(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
+	m_model1.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
+	m_model.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
 
 	m_text->RenderText();
 
@@ -276,10 +274,10 @@ bool Graphics::InitialiseScene()
 	}
 
 	// Initialise Model
-	if (!m_model.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/LewisPaella.png", m_cb_vertexShader))
+	if (!m_model.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/seamless_grass.jpg", m_cb_vertexShader))
 		return false;
 
-	if (!m_model1.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Camera.obj", "Assets/Textures/LewisPaella.png", m_cb_vertexShader))
+	if (!m_model1.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Cube.obj", "Assets/Textures/seamless_grass.jpg", m_cb_vertexShader))
 		return false;
 
 	m_camera.SetPosition(0.0f, 0.0f, -5.0f);

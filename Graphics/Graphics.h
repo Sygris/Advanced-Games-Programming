@@ -1,9 +1,9 @@
 #pragma once
 #include <d3d11.h>
-#include <wrl/client.h> // ComPtr
+//#include <wrl/client.h> // ComPtr
 #include "Shaders.h"
 #include "Camera.h"
-#include "Model.h"
+#include "../Entities/GameObject.h"
 #include "../UI/text2D.h"
 
 class Graphics
@@ -13,8 +13,8 @@ public:
 	void RenderFrame();
 
 	Camera m_camera;
-	Model m_model;
-	Model m_model1;
+	GameObject m_model;
+	GameObject m_model1;
 
 	Text2D* m_text = nullptr;
 
