@@ -19,6 +19,12 @@ public:
 	const XMFLOAT3& GetRotationFloat3() const;
 	const XMVECTOR& GetScaleVector() const;
 	const XMFLOAT3& GetScaleFloat3() const;
+	
+	// Get World Matrix
+	const XMMATRIX& GetWorldMatrix() const;
+	
+	// Get Sphere Collider
+	SphereCollider* GetSphereCollider();
 
 	// Set Position (Can use XMVECTOR, XMFLOAT3 or each individual component)
 	void SetPosition(const XMVECTOR& position);
@@ -55,7 +61,7 @@ public:
 	const XMVECTOR& GetLeftVector();
 protected:
 	// World Matrix
-	XMMATRIX worldMatrix = XMMatrixIdentity();
+	XMMATRIX m_worldMatrix = XMMatrixIdentity();
 
 	// VECTORS
 	XMVECTOR m_positionVector;

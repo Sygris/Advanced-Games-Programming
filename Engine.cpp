@@ -32,7 +32,7 @@ void Engine::Update()
 	m_keyboard->ReadInputStates();
 	m_mouse->ReadInputStates();
 
-	m_graphics.m_model.AdjustRotation(0.0f, 0.001f * deltaTime, 0.0f);
+	m_graphics.m_sphere.AdjustRotation(0.0f, 0.001f * deltaTime, 0.0f);
 
 	if (m_mouse->ButtonDown(0))
 	{
@@ -68,7 +68,19 @@ void Engine::Update()
 		m_graphics.m_camera.AdjustPosition(0.0f, -0.01f * deltaTime, 0.0f);
 	}
 
-	m_graphics.m_text->AddText("Tiago", -0.95f, 0.95f, 0.1f);
+	if (m_keyboard->IsKeyPreesed(DIK_RIGHTARROW))
+	{
+		m_graphics.m_pointySphere.AdjustPosition(m_graphics.m_pointySphere.GetRightVector() * 0.01f * deltaTime);
+	}
+
+	m_graphics.m_text->AddText("Move WASD", -0.99f, 0.99f, 0.045f);
+	m_graphics.m_text->AddText("Rotate Hold Left Click on the mouse", -0.99f, 0.89f, 0.045f);
+	m_graphics.m_text->AddText("UP Space Bar", -0.99f, 0.79f, 0.045f);
+
+	if (SphereToSphereCollision(m_graphics.m_pointySphere, m_graphics.m_sphere))
+	{
+		m_graphics.m_pointySphere.AdjustPosition(m_graphics.m_pointySphere.GetLeftVector() * 25.0f * deltaTime);
+	}
 }
 
 void Engine::RenderFrame()

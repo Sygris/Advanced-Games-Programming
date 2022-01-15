@@ -1,6 +1,8 @@
 #pragma once
 #include "../Util/objfilemodel.h"
 
+class GameObject;
+
 class SphereCollider
 {
 public:
@@ -8,6 +10,10 @@ public:
 	float m_radius;
 
 	void CalculateModelCentrePoint(ObjFileModel* model);
-	void CalculateSphereColliderRadius(ObjFileModel* model, float scale = 1.0f);
+	void CalculateSphereColliderRadius(ObjFileModel* model);
+
+	XMVECTOR GetSphereColliderWorldSpacePosition(const XMMATRIX& worldMatrix);
+	float GetSphereColliderRadius(float scale = 1.0f);
 };
 
+bool SphereToSphereCollision(GameObject& a, GameObject& b);

@@ -17,9 +17,9 @@ GameObject::~GameObject()
 bool GameObject::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, ConstantBuffer<CB_VS_Model>& cbVertexShader)
 {
     m_position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    m_positionVector = XMLoadFloat3(&m_position);
+    m_positionVector = XMVectorZero();
     m_rotation = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    m_rotationVector = XMLoadFloat3(&m_rotation);
+    m_rotationVector = XMVectorZero();
     m_scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
     m_scaleVector = XMLoadFloat3(&m_scale);
     
@@ -34,7 +34,7 @@ bool GameObject::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 
 void GameObject::Draw(const XMMATRIX& viewProjectionMatrix)
 {
-    m_model->Draw(worldMatrix, viewProjectionMatrix);
+    m_model->Draw(m_worldMatrix, viewProjectionMatrix);
 }
 
 const XMVECTOR& GameObject::GetPositionVector() const
@@ -65,6 +65,16 @@ const XMVECTOR& GameObject::GetScaleVector() const
 const XMFLOAT3& GameObject::GetScaleFloat3() const
 {
     return m_scale;
+}
+
+const XMMATRIX& GameObject::GetWorldMatrix() const
+{
+    return m_worldMatrix;
+}
+
+SphereCollider* GameObject::GetSphereCollider()
+{
+    return &m_collider;
 }
 
 void GameObject::SetPosition(const XMVECTOR& position)
@@ -253,9 +263,9 @@ const XMVECTOR& GameObject::GetLeftVector()
 void GameObject::UpdateWorldMatrix()
 {
     // Update World Matrix of the GameObject
-    worldMatrix = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
-    worldMatrix *= XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
-    worldMatrix *= XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
+    m_worldMatrix = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
+    m_worldMatrix *= XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
+    m_worldMatrix *= XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
 
     // Updates Directional Vectors of the GameObject
     XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, m_rotation.y, 0.0f);

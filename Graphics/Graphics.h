@@ -13,8 +13,8 @@ public:
 	void RenderFrame();
 
 	Camera m_camera;
-	GameObject m_model;
-	GameObject m_model1;
+	GameObject m_sphere;
+	GameObject m_pointySphere;
 
 	Text2D* m_text = nullptr;
 

@@ -25,8 +25,8 @@ void Graphics::RenderFrame()
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
 	m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 
-	m_model1.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
-	m_model.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
+	m_pointySphere.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
+	m_sphere.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
 
 	m_text->RenderText();
 
@@ -274,12 +274,12 @@ bool Graphics::InitialiseScene()
 	}
 
 	// Initialise Model
-	if (!m_model.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/seamless_grass.jpg", m_cb_vertexShader))
+	if (!m_sphere.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/seamless_grass.jpg", m_cb_vertexShader))
 		return false;
 
-	if (!m_model1.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/PointySphere.obj", "Assets/Textures/seamless_grass.jpg", m_cb_vertexShader))
+	if (!m_pointySphere.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Cube.obj", "Assets/Textures/LewisPaella.png", m_cb_vertexShader))
 		return false;
-	m_model1.SetPosition(-5.0f, 0.0f, 0.0f);
+	m_pointySphere.SetPosition(-10.0f, 0.0f, 0.0f);
 
 	m_camera.SetPosition(0.0f, 0.0f, -5.0f);
 	m_camera.SetProjectMatrix(90.0f, static_cast<float>(m_windowWidth) / static_cast<float>(m_windowHeight), 0.1f, 1000.0f);
