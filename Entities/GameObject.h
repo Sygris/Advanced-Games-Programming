@@ -1,10 +1,12 @@
 #pragma once
 #include <wrl/client.h>
 #include "../Graphics/Model.h"
+#include "../Physics/Colliders.h"
 
 class GameObject
 {
 public:
+	GameObject();
 	~GameObject();
 
 	bool Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, ConstantBuffer<CB_VS_Model>& cbVertexShader);
@@ -52,6 +54,7 @@ public:
 	const XMVECTOR& GetBackwardVector();
 	const XMVECTOR& GetLeftVector();
 protected:
+	// World Matrix
 	XMMATRIX worldMatrix = XMMatrixIdentity();
 
 	// VECTORS
@@ -76,6 +79,9 @@ protected:
 	const XMVECTOR DEFAULT_BACKWARD_VECTOR = XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
 	const XMVECTOR DEFAULT_LEFT_VECTOR = XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
 	const XMVECTOR DEFAULT_RIGHT_VECTOR = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+
+	// Collider
+	SphereCollider m_collider;
 private:
 	void UpdateWorldMatrix();
 

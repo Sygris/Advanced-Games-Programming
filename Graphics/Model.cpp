@@ -97,3 +97,8 @@ bool Model::AddTexture(const char* filename)
 
 	return true;
 }
+
+ObjFileModel* Model::GetObjFileModel()
+{
+	return m_objFileModel;
+}

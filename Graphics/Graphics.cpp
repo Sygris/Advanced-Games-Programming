@@ -277,13 +277,12 @@ bool Graphics::InitialiseScene()
 	if (!m_model.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/seamless_grass.jpg", m_cb_vertexShader))
 		return false;
 
-	if (!m_model1.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Cube.obj", "Assets/Textures/seamless_grass.jpg", m_cb_vertexShader))
+	if (!m_model1.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/PointySphere.obj", "Assets/Textures/seamless_grass.jpg", m_cb_vertexShader))
 		return false;
+	m_model1.SetPosition(-5.0f, 0.0f, 0.0f);
 
 	m_camera.SetPosition(0.0f, 0.0f, -5.0f);
 	m_camera.SetProjectMatrix(90.0f, static_cast<float>(m_windowWidth) / static_cast<float>(m_windowHeight), 0.1f, 1000.0f);
-
-	m_model1.SetPosition(-5.0f, 0.0f, 0.0f);
 
 	m_text = new Text2D("Assets/Fonts/font1.png", m_device.Get(), m_deviceContext.Get());
 

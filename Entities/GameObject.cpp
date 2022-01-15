@@ -1,5 +1,10 @@
 #include "GameObject.h"
 
+GameObject::GameObject()
+{
+    m_model = new Model();
+}
+
 GameObject::~GameObject()
 {
     if (m_model != nullptr)
@@ -18,9 +23,11 @@ bool GameObject::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceCon
     m_scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
     m_scaleVector = XMLoadFloat3(&m_scale);
     
-    m_model = new Model();
     if (!m_model->Initialise(device, deviceContext, objPath, texturePath, cbVertexShader))
         return false;
+
+    m_collider.CalculateModelCentrePoint(m_model->GetObjFileModel());
+    m_collider.CalculateSphereColliderRadius(m_model->GetObjFileModel());
 
     return true;
 }

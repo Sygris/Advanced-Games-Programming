@@ -15,6 +15,8 @@ public:
 
 	bool LoadObjModel(const char* filename);
 	bool AddTexture(const char* filename);
+
+	ObjFileModel* GetObjFileModel();
 private:
 	ObjFileModel* m_objFileModel = nullptr;
 	VertexShader m_vertexShader;
