@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "../Entities/GameObject.h"
 #include "../UI/text2D.h"
+#include "../Map.h"
 
 class Graphics
 {
@@ -15,6 +16,7 @@ public:
 	Camera m_camera;
 	GameObject m_sphere;
 	GameObject m_pointySphere;
+	Map* m_map;
 
 	Text2D* m_text = nullptr;
 

@@ -25,6 +25,7 @@ void Graphics::RenderFrame()
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
 	m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 
+	m_map->Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
 	m_pointySphere.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
 	m_sphere.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
 
@@ -154,6 +155,25 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 	}
 #pragma endregion
 
+#pragma region Create Z Buffer
+	ID3D11Texture2D* pZBufferTexture;
+	hr = m_device->CreateTexture2D(&depthStencilBuffer, NULL, &pZBufferTexture);
+
+	if (FAILED(hr)) return hr;
+
+	// Create the Z buffer
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+	ZeroMemory(&dsvDesc, sizeof(dsvDesc));
+
+	dsvDesc.Format = depthStencilBuffer.Format;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
+	m_device->CreateDepthStencilView(pZBufferTexture, &dsvDesc, m_depthStencilView.GetAddressOf());
+	pZBufferTexture->Release();
+
+	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
+#pragma endregion
+
 #pragma region Create Rasterizer State
 	D3D11_RASTERIZER_DESC rasterizerDesc;
 	ZeroMemory(&rasterizerDesc, sizeof(rasterizerDesc));
@@ -274,15 +294,17 @@ bool Graphics::InitialiseScene()
 	}
 
 	// Initialise Model
-	if (!m_sphere.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/seamless_grass.jpg", m_cb_vertexShader))
+	if (!m_sphere.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/Wall.jpg", m_cb_vertexShader))
 		return false;
 
-	if (!m_pointySphere.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Cube.obj", "Assets/Textures/LewisPaella.png", m_cb_vertexShader))
+	if (!m_pointySphere.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Cube.obj", "Assets/Textures/Wall.png", m_cb_vertexShader))
 		return false;
 	m_pointySphere.SetPosition(-10.0f, 0.0f, 0.0f);
 
 	m_camera.SetPosition(0.0f, 0.0f, -5.0f);
 	m_camera.SetProjectMatrix(90.0f, static_cast<float>(m_windowWidth) / static_cast<float>(m_windowHeight), 0.1f, 1000.0f);
+
+	m_map = new Map(m_device.Get(), m_deviceContext.Get(), "Assets/Maps/map.txt", m_cb_vertexShader);
 
 	m_text = new Text2D("Assets/Fonts/font1.png", m_device.Get(), m_deviceContext.Get());
 

@@ -2,6 +2,13 @@
 
 GameObject::GameObject()
 {
+    m_position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    m_positionVector = XMVectorZero();
+    m_rotation = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    m_rotationVector = XMVectorZero();
+    m_scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
+    m_scaleVector = XMLoadFloat3(&m_scale);
+
     m_model = new Model();
 }
 
@@ -16,18 +23,11 @@ GameObject::~GameObject()
 
 bool GameObject::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, ConstantBuffer<CB_VS_Model>& cbVertexShader)
 {
-    m_position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    m_positionVector = XMVectorZero();
-    m_rotation = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    m_rotationVector = XMVectorZero();
-    m_scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
-    m_scaleVector = XMLoadFloat3(&m_scale);
-    
     if (!m_model->Initialise(device, deviceContext, objPath, texturePath, cbVertexShader))
         return false;
 
-    m_collider.CalculateModelCentrePoint(m_model->GetObjFileModel());
-    m_collider.CalculateSphereColliderRadius(m_model->GetObjFileModel());
+    m_sphereCollider.CalculateModelCentrePoint(m_model->GetObjFileModel());
+    m_sphereCollider.CalculateSphereColliderRadius(m_model->GetObjFileModel());
 
     return true;
 }
@@ -74,7 +74,12 @@ const XMMATRIX& GameObject::GetWorldMatrix() const
 
 SphereCollider* GameObject::GetSphereCollider()
 {
-    return &m_collider;
+    return &m_sphereCollider;
+}
+
+BoxCollider* GameObject::GetBoxCollider()
+{
+    return &m_boxCollider;
 }
 
 void GameObject::SetPosition(const XMVECTOR& position)

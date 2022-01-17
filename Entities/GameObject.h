@@ -25,6 +25,7 @@ public:
 	
 	// Get Sphere Collider
 	SphereCollider* GetSphereCollider();
+	BoxCollider* GetBoxCollider();
 
 	// Set Position (Can use XMVECTOR, XMFLOAT3 or each individual component)
 	void SetPosition(const XMVECTOR& position);
@@ -87,7 +88,8 @@ protected:
 	const XMVECTOR DEFAULT_RIGHT_VECTOR = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 
 	// Collider
-	SphereCollider m_collider;
+	SphereCollider m_sphereCollider;
+	BoxCollider m_boxCollider;
 private:
 	void UpdateWorldMatrix();
 

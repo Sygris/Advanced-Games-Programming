@@ -25,7 +25,7 @@ void Model::Draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatr
     m_cbVertexShader->data.worldViewProjection = XMMatrixTranspose(m_cbVertexShader->data.worldViewProjection);
 	transpose = XMMatrixTranspose(worldMatrix);
 	m_cbVertexShader->data.ambientLightColour = XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f);
-	m_cbVertexShader->data.directionalLightColour = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	m_cbVertexShader->data.directionalLightColour = XMVectorSet(1.0f, 1.0f, 1.0f, 0.0f);
 	m_cbVertexShader->data.directionalLightVector = XMVector3Transform(XMVectorSet(0.0f, 5.0f, 0.0f, 0.0f), transpose);
 	m_cbVertexShader->data.directionalLightVector = XMVector3Normalize(m_cbVertexShader->data.directionalLightVector);
     m_cbVertexShader->ApplyChanges();
