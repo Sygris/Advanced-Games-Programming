@@ -9,7 +9,7 @@ public:
 	GameObject();
 	~GameObject();
 
-	bool Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, ConstantBuffer<CB_VS_Model>& cbVertexShader);
+	bool Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, const char* vertexShader, const char* pixelShader, ConstantBuffer<CB_VS_Model>& cbVertexShader);
 	void Draw(const XMMATRIX& viewProjectionMatrix);
 
 	// Get Position, Rotation and Scale (Returns a vector or a float3)

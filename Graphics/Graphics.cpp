@@ -21,12 +21,15 @@ void Graphics::RenderFrame()
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	m_deviceContext->RSSetState(m_rasterizerState.Get());
-	m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
 	m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 
+	m_deviceContext->OMSetDepthStencilState(m_depthStencilStateSkyBox.Get(), 0);
+	m_deviceContext->RSSetState(m_rasterizerStateSkyBox.Get());
+	m_skybox.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
+	m_deviceContext->RSSetState(m_rasterizerState.Get());
+	m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
+
 	m_map->Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
-	m_pointySphere.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
 	m_sphere.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
 
 	m_text->RenderText();
@@ -194,6 +197,11 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 		OutputDebugString("Failed to create Rasterizer State!");
 		return false;
 	}
+
+	// Sky Box
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_FRONT;
+	hr = m_device->CreateRasterizerState(&rasterizerDesc, m_rasterizerStateSkyBox.GetAddressOf());
 #pragma endregion 
 
 #pragma region Create Blend State
@@ -254,6 +262,14 @@ bool Graphics::InitialiseDirectX(HWND hWnd)
 		OutputDebugString("Failed to create Depth Stencil State!");
 		return false;
 	}
+
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	hr = m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStateSkyBox.GetAddressOf());
+	if (FAILED(hr))
+	{
+		OutputDebugString("Failed to create Depth Stencil State!");
+		return false;
+	}
 #pragma endregion
 
 #pragma region Create and Set Viewport
@@ -294,12 +310,13 @@ bool Graphics::InitialiseScene()
 	}
 
 	// Initialise Model
-	if (!m_sphere.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/Wall.jpg", m_cb_vertexShader))
+	if (!m_sphere.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/Wall.jpg", "ModelShader.cso", "PixelShader.cso", m_cb_vertexShader))
 		return false;
 
-	if (!m_pointySphere.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Cube.obj", "Assets/Textures/Wall.png", m_cb_vertexShader))
+	if (!m_skybox.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Cube.obj", "Assets/Textures/skybox02.dds", "SkyBoxVS.cso", "SkyBoxPS.cso", m_cb_vertexShader))
 		return false;
-	m_pointySphere.SetPosition(-10.0f, 0.0f, 0.0f);
+	m_skybox.SetPosition(0.0f, 0.0f, 0.0f);
+	m_skybox.SetScale(100.0f, 100.0f, 100.0f);
 
 	m_camera.SetPosition(0.0f, 0.0f, -5.0f);
 	m_camera.SetProjectMatrix(90.0f, static_cast<float>(m_windowWidth) / static_cast<float>(m_windowHeight), 0.1f, 1000.0f);

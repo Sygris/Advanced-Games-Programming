@@ -72,25 +72,25 @@ void Engine::Update()
 	m_graphics.m_text->AddText("Rotate Hold Left Click on the mouse", -0.99f, 0.89f, 0.045f);
 	m_graphics.m_text->AddText("UP Space Bar", -0.99f, 0.79f, 0.045f);
 
-	if (m_keyboard->IsKeyPreesed(DIK_RIGHTARROW))
-	{
-		m_graphics.m_pointySphere.AdjustPosition(m_graphics.m_pointySphere.GetRightVector() * 0.01f * deltaTime);
+	//if (m_keyboard->IsKeyPreesed(DIK_RIGHTARROW))
+	//{
+	//	m_graphics.m_skybox.AdjustPosition(m_graphics.m_skybox.GetRightVector() * 0.01f * deltaTime);
 
-		if (SphereToSphereCollision(m_graphics.m_pointySphere, m_graphics.m_sphere))
-		{
-			m_graphics.m_pointySphere.AdjustPosition(m_graphics.m_pointySphere.GetLeftVector() * 0.01f * deltaTime);
-		}
-	}
+	//	if (SphereToSphereCollision(m_graphics.m_skybox, m_graphics.m_sphere))
+	//	{
+	//		m_graphics.m_skybox.AdjustPosition(m_graphics.m_skybox.GetLeftVector() * 0.01f * deltaTime);
+	//	}
+	//}
 
-	if (m_keyboard->IsKeyPreesed(DIK_LEFTARROW))
-	{
-		m_graphics.m_pointySphere.AdjustPosition(m_graphics.m_pointySphere.GetLeftVector() * 0.01f * deltaTime);
+	//if (m_keyboard->IsKeyPreesed(DIK_LEFTARROW))
+	//{
+	//	m_graphics.m_skybox.AdjustPosition(m_graphics.m_skybox.GetLeftVector() * 0.01f * deltaTime);
 
-		if (SphereToSphereCollision(m_graphics.m_pointySphere, m_graphics.m_sphere))
-		{
-			m_graphics.m_pointySphere.AdjustPosition(m_graphics.m_pointySphere.GetRightVector() * 0.01f * deltaTime);
-		}
-	}
+	//	if (SphereToSphereCollision(m_graphics.m_skybox, m_graphics.m_sphere))
+	//	{
+	//		m_graphics.m_skybox.AdjustPosition(m_graphics.m_skybox.GetRightVector() * 0.01f * deltaTime);
+	//	}
+	//}
 }
 
 void Engine::RenderFrame()

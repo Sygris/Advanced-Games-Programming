@@ -48,7 +48,7 @@ void Map::InitializeMap(ID3D11Device* device, ID3D11DeviceContext* deviceContext
 			case '0':
 			{
 				GameObject* floor = new GameObject();
-				floor->Initialise(device, deviceContext, "Assets/Models/cube.obj", "Assets/Textures/seamless_pavement.jpg", cbVertexShader);
+				floor->Initialise(device, deviceContext, "Assets/Models/cube.obj", "Assets/Textures/seamless_pavement.jpg", "ModelShader.cso", "PixelShader.cso", cbVertexShader);
 				floor->SetPosition(i * 2, 0.0f, j * 1);
 				m_floor.push_back(floor);
 				break;
@@ -58,21 +58,21 @@ void Map::InitializeMap(ID3D11Device* device, ID3D11DeviceContext* deviceContext
 				GameObject* wall = new GameObject();
 				wall->SetPosition(i * 2, 6.0f, j * 1);
 				wall->SetScale(1.0f, 5.0f, 1.0f);
-				wall->Initialise(device, deviceContext, "Assets/Models/cube.obj", "Assets/Textures/Wall1.png", cbVertexShader);
+				wall->Initialise(device, deviceContext, "Assets/Models/cube.obj", "Assets/Textures/Wall1.png", "ModelShader.cso", "PixelShader.cso", cbVertexShader);
 				m_wall.push_back(wall);
 				break;
 			}
 			case 'N':
 			{
 				GameObject* floor = new GameObject();
-				floor->Initialise(device, deviceContext, "Assets/Models/cube.obj", "Assets/Textures/seamless_pavement.jpg", cbVertexShader);
+				floor->Initialise(device, deviceContext, "Assets/Models/cube.obj", "Assets/Textures/seamless_pavement.jpg", "ModelShader.cso", "PixelShader.cso", cbVertexShader);
 				floor->SetPosition(i * 2, 0.0f, j * 1);
 				m_floor.push_back(floor);
 
 				GameObject* statue = new GameObject();
 				statue->SetPosition(i * 2, 5.0f, j * 1);
 				statue->SetRotation(45.0f, 0.0f, 0.0f);
-				statue->Initialise(device, deviceContext, "Assets/Models/Camera.obj", "Assets/Textures/Wall1.png", cbVertexShader);
+				statue->Initialise(device, deviceContext, "Assets/Models/Camera.obj", "Assets/Textures/Wall1.png", "ModelShader.cso", "PixelShader.cso", cbVertexShader);
 
 				m_statue = statue;
 				break;

@@ -21,9 +21,9 @@ GameObject::~GameObject()
     }
 }
 
-bool GameObject::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, ConstantBuffer<CB_VS_Model>& cbVertexShader)
+bool GameObject::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, const char* vertexShader, const char* pixelShader, ConstantBuffer<CB_VS_Model>& cbVertexShader)
 {
-    if (!m_model->Initialise(device, deviceContext, objPath, texturePath, cbVertexShader))
+    if (!m_model->Initialise(device, deviceContext, objPath, texturePath, vertexShader, pixelShader, cbVertexShader))
         return false;
 
     m_sphereCollider.CalculateModelCentrePoint(m_model->GetObjFileModel());

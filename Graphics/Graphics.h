@@ -15,7 +15,7 @@ public:
 
 	Camera m_camera;
 	GameObject m_sphere;
-	GameObject m_pointySphere;
+	GameObject m_skybox;
 	Map* m_map;
 
 	Text2D* m_text = nullptr;
@@ -44,9 +44,11 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_depthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilStateSkyBox;
 
 	// Rasterizer
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerStateSkyBox;
 
 	// Blend State
 	Microsoft::WRL::ComPtr<ID3D11BlendState> m_blendState;

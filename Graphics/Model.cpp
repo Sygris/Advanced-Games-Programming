@@ -1,12 +1,13 @@
 #include "Model.h"
+#include "../HelperFunctions.h"
 
-bool Model::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, ConstantBuffer<CB_VS_Model>& cbVertexShader)
+bool Model::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, const char* vertexShader, const char* pixelShader, ConstantBuffer<CB_VS_Model>& cbVertexShader)
 {
     m_device = device;
     m_deviceContext = deviceContext;
     m_cbVertexShader = &cbVertexShader;
 
-	LoadObjModel(objPath);
+	LoadObjModel(objPath, vertexShader, pixelShader);
 	AddTexture(texturePath);
 
     return true;
@@ -36,7 +37,7 @@ void Model::Draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatr
 	m_objFileModel->Draw();
 }
 
-bool Model::LoadObjModel(const char* filename)
+bool Model::LoadObjModel(const char* filename, const char* vertexShader, const char* pixelShader)
 {
 	//Load new model
 	if (m_objFileModel == nullptr)
@@ -48,6 +49,7 @@ bool Model::LoadObjModel(const char* filename)
 
 #pragma region Determine Shader Path (Change it to a better solution in the future)
 	std::wstring shaderFolder = L"";
+	std::wstring path = L"";
 
 	// If running from visual studio
 	if (IsDebuggerPresent())
@@ -78,10 +80,13 @@ bool Model::LoadObjModel(const char* filename)
 
 	UINT numOfLayout = ARRAYSIZE(iedesc);
 
-	if (!m_vertexShader.Initialise(m_device.Get(), shaderFolder + L"ModelShader.cso", iedesc, numOfLayout))
+
+	HelperFunctions::StringToWide(path, vertexShader);
+	if (!m_vertexShader.Initialise(m_device.Get(), shaderFolder + path, iedesc, numOfLayout))
 		return false;
 
-	if (!m_pixelShader.Initialise(m_device.Get(), shaderFolder + L"PixelShader.cso"))
+	HelperFunctions::StringToWide(path, pixelShader);
+	if (!m_pixelShader.Initialise(m_device.Get(), shaderFolder + path))
 		return false;
 
 	return true;
