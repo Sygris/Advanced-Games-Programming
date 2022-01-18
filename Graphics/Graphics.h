@@ -6,6 +6,9 @@
 #include "../Entities/GameObject.h"
 #include "../UI/text2D.h"
 #include "../Map.h"
+#include "..\Light\Light.h"
+#include "..\Light\DirectionalLight.h"
+#include "../Light/PointLight.h"
 
 class Graphics
 {
@@ -17,6 +20,10 @@ public:
 	GameObject m_sphere;
 	GameObject m_skybox;
 	Map* m_map;
+
+	Light* m_ambientLight;
+	DirectionalLight* m_directioanlLight;
+	PointLight* m_pointLight;
 
 	Text2D* m_text = nullptr;
 

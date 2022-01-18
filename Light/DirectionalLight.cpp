@@ -1,8 +1,9 @@
 #include "DirectionalLight.h"
 
-DirectionalLight::DirectionalLight()
+DirectionalLight::DirectionalLight(const float x, float y, float z, const float r, const float g, const float b, const float a)
 {
-    m_direction = XMVectorZero();
+    Light(r, g, b, a);
+    m_direction = XMVectorSet(x, y, z, 1.0f);
 }
 
 XMVECTOR DirectionalLight::GetDirection(XMMATRIX world)

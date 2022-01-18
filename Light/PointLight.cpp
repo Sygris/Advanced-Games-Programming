@@ -2,12 +2,14 @@
 
 PointLight::PointLight()
 {
-	m_range = 15;
+	Light(1.0f, 0.0f, 0.0f, 1.0f);
+	m_range = 8;
 	m_attenuation = XMFLOAT3(0.0f, 1.0f, 0.0f);
 }
 
 PointLight::PointLight(float range, XMFLOAT3 attenuation)
 {
+	Light(1.0f, 0.0f, 0.0f, 1.0f);
 	m_range = range;
 	m_attenuation = attenuation;
 }
@@ -22,7 +24,7 @@ const XMFLOAT3 PointLight::GetAttenuation()
 	return m_attenuation;
 }
 
-const XMVECTOR PointLight::GetInversePosition(XMMATRIX& world)
+const XMVECTOR PointLight::GetInversePosition(const XMMATRIX& world)
 {
 	XMVECTOR determinant; // Inverse function returns determinant but isn't used 
 	XMMATRIX inverse = XMMatrixInverse(&determinant, world); // Inverse matrix

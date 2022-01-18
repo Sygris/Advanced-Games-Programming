@@ -9,7 +9,7 @@ public:
 
 	float GetRange();
 	const XMFLOAT3 GetAttenuation();
-	const XMVECTOR GetInversePosition(XMMATRIX& world);
+	const XMVECTOR GetInversePosition(const XMMATRIX& world);
 
 	void SetRange(float range);
 	void SetAttenuation(const XMFLOAT3& attenuation);

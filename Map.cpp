@@ -8,19 +8,17 @@ Map::Map(ID3D11Device* device, ID3D11DeviceContext* deviceContext, std::string f
 	InitializeMap(device, deviceContext, cbVertexShader);
 }
 
-void Map::Draw(const DirectX::XMMATRIX& viewProjectionMatrix)
+void Map::Draw(const XMMATRIX& viewProjectionMatrix, Light* ambientLight, DirectionalLight* directionalLight, PointLight* pointLight)
 {
 	for (size_t i = 0; i < m_floor.size(); i++)
 	{
-		m_floor[i]->Draw(viewProjectionMatrix);
+		m_floor[i]->Draw(viewProjectionMatrix, ambientLight, directionalLight, pointLight);
 	}
 
 	for (size_t j = 0; j < m_wall.size(); j++)
 	{
-		m_wall[j]->Draw(viewProjectionMatrix);
+		m_wall[j]->Draw(viewProjectionMatrix, ambientLight, directionalLight, pointLight);
 	}
-
-	m_statue->Draw(viewProjectionMatrix);
 }
 
 void Map::LoadMapFromFile(std::string filePath)
@@ -53,28 +51,13 @@ void Map::InitializeMap(ID3D11Device* device, ID3D11DeviceContext* deviceContext
 				m_floor.push_back(floor);
 				break;
 			}
-			case '3':
+			case '1':
 			{
 				GameObject* wall = new GameObject();
 				wall->SetPosition(i * 2, 6.0f, j * 1);
 				wall->SetScale(1.0f, 5.0f, 1.0f);
 				wall->Initialise(device, deviceContext, "Assets/Models/cube.obj", "Assets/Textures/Wall1.png", "ModelShader.cso", "PixelShader.cso", cbVertexShader);
 				m_wall.push_back(wall);
-				break;
-			}
-			case 'N':
-			{
-				GameObject* floor = new GameObject();
-				floor->Initialise(device, deviceContext, "Assets/Models/cube.obj", "Assets/Textures/seamless_pavement.jpg", "ModelShader.cso", "PixelShader.cso", cbVertexShader);
-				floor->SetPosition(i * 2, 0.0f, j * 1);
-				m_floor.push_back(floor);
-
-				GameObject* statue = new GameObject();
-				statue->SetPosition(i * 2, 5.0f, j * 1);
-				statue->SetRotation(45.0f, 0.0f, 0.0f);
-				statue->Initialise(device, deviceContext, "Assets/Models/Camera.obj", "Assets/Textures/Wall1.png", "ModelShader.cso", "PixelShader.cso", cbVertexShader);
-
-				m_statue = statue;
 				break;
 			}
 			}

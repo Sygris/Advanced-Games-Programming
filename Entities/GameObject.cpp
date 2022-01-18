@@ -1,4 +1,7 @@
 #include "GameObject.h"
+#include "..\Light\Light.h"
+#include "..\Light\DirectionalLight.h"
+#include "..\Light\PointLight.h"
 
 GameObject::GameObject()
 {
@@ -32,9 +35,9 @@ bool GameObject::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceCon
     return true;
 }
 
-void GameObject::Draw(const XMMATRIX& viewProjectionMatrix)
+void GameObject::Draw(const XMMATRIX& viewProjectionMatrix, Light* ambientLight, DirectionalLight* directionalLight, PointLight* pointLight)
 {
-    m_model->Draw(m_worldMatrix, viewProjectionMatrix);
+    m_model->Draw(m_worldMatrix, viewProjectionMatrix, ambientLight, directionalLight, pointLight);
 }
 
 const XMVECTOR& GameObject::GetPositionVector() const

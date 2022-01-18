@@ -3,6 +3,10 @@
 #include "../Graphics/Model.h"
 #include "../Physics/Colliders.h"
 
+class Light;
+class DirectionalLight;
+class PointLight;
+
 class GameObject
 {
 public:
@@ -10,7 +14,7 @@ public:
 	~GameObject();
 
 	bool Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* objPath, const char* texturePath, const char* vertexShader, const char* pixelShader, ConstantBuffer<CB_VS_Model>& cbVertexShader);
-	void Draw(const XMMATRIX& viewProjectionMatrix);
+	void Draw(const XMMATRIX& viewProjectionMatrix, Light* ambientLight, DirectionalLight* directionalLight, PointLight* pointLight);
 
 	// Get Position, Rotation and Scale (Returns a vector or a float3)
 	const XMVECTOR& GetPositionVector() const;

@@ -15,6 +15,10 @@ struct CB_VS_Model
 	DirectX::XMVECTOR directionalLightVector;
 	DirectX::XMVECTOR directionalLightColour;
 	DirectX::XMVECTOR ambientLightColour;
+	DirectX::XMVECTOR pointLightPosisiton;
+	DirectX::XMVECTOR pointLightColour;
+	DirectX::XMFLOAT3 pointLightAttenuation;
+	float range;
 };
 #pragma endregion
 

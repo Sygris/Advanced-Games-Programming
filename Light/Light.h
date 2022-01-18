@@ -16,7 +16,7 @@ public:
 
 	void SetColour(XMFLOAT3& newColour);
 	void SetColour(XMVECTOR& newColour);
-	void Setcolour(float r, float g, float b, float a);
+	void SetColour(float r, float g, float b, float a);
 
 protected:
 	XMVECTOR m_colour;

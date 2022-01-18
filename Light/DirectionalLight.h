@@ -4,7 +4,7 @@
 class DirectionalLight : public Light
 {
 public:
-	DirectionalLight();
+	DirectionalLight(const float x, float y, float z, const float r, const float g, const float b, const float a);
 
 	XMVECTOR GetDirection(XMMATRIX world);
 

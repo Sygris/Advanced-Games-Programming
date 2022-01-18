@@ -39,7 +39,7 @@ void Light::SetColour(XMVECTOR& newColour)
 	m_colour = newColour;
 }
 
-void Light::Setcolour(float r, float g, float b, float a)
+void Light::SetColour(float r, float g, float b, float a)
 {
 	m_colour = XMVectorSet(r, g, b, a);
 }
