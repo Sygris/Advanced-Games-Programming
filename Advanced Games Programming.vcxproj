@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Entities\Rock.cpp" />
+    <ClCompile Include="Entities\HealthKit.cpp" />
     <ClCompile Include="Light\DirectionalLight.cpp" />
     <ClCompile Include="Light\Light.cpp" />
     <ClCompile Include="Map.cpp" />
@@ -168,6 +169,7 @@
     <ClCompile Include="Input\Mouse.cpp" />
     <ClCompile Include="Graphics\Model.cpp" />
     <ClCompile Include="Light\PointLight.cpp" />
+    <ClCompile Include="Entities\Player.cpp" />
     <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="UI\text2D.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -177,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entities\Rock.h" />
+    <ClInclude Include="Entities\HealthKit.h" />
     <ClInclude Include="HelperFunctions.h" />
     <ClInclude Include="Light\DirectionalLight.h" />
     <ClInclude Include="Light\Light.h" />
@@ -194,6 +197,7 @@
     <ClInclude Include="Input\Mouse.h" />
     <ClInclude Include="Graphics\Model.h" />
     <ClInclude Include="Light\PointLight.h" />
+    <ClInclude Include="Entities\Player.h" />
     <ClInclude Include="SkyBox.h" />
     <ClInclude Include="UI\text2D.h" />
     <ClInclude Include="Timer.h" />

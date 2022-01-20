@@ -2,6 +2,7 @@
 #include "../Util/objfilemodel.h"
 
 class GameObject;
+class Camera;
 
 class SphereCollider
 {
@@ -24,12 +25,17 @@ public:
 	XMFLOAT3 m_minimum = { 0.0f, 0.0f, 0.0f };
 	XMFLOAT3 m_maximum = { 0.0f, 0.0f, 0.0f };
 
+	XMVECTOR m_worldPositionMinimum = XMVectorZero();
+	XMVECTOR m_worldPositionMaximum = XMVectorZero();
+
 	void CalculateCollider(ObjFileModel* model);
+	void CalculateBoundingBoxWorldPosition(XMFLOAT3 scale, XMFLOAT3 rotation, XMFLOAT3 position);
 };
 
-bool SphereToSphereCollision(GameObject& a, GameObject& b);
+bool SphereToSphereCollision(GameObject* a, GameObject* b);
+bool CameraToSphereCollision(Camera* a, GameObject* b);
+bool SphereToSphereCollision(GameObject* a, GameObject* b, XMVECTOR& newPosition);
 bool BoxToBoxCollision(BoxCollider& a, BoxCollider& b);
-bool BoxToSphereCollision(SphereCollider& sphere, BoxCollider& box);
-
-// TODO: When using this I get an unresolved 
-//bool SphereToSphereCollision(GameObject& a, GameObject& b, XMVECTOR& newPosition);
+bool BoxToSphereCollision(GameObject* a, GameObject* box);
+bool BoxToSphereCollision(GameObject* a, GameObject* box, XMVECTOR& newPosition);
+bool BoxToSphereCollision(SphereCollider* a, GameObject* box, XMVECTOR& newPosition);

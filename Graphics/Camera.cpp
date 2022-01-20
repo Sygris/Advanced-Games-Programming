@@ -171,22 +171,27 @@ void Camera::SetLookAtPos(XMFLOAT3 lookAtPosition)
 	{
 		// Prevents warning 
 		double x = static_cast<double>(lookAtPosition.x);
-		double y = static_cast<double>(lookAtPosition.y);
+		double z = static_cast<double>(lookAtPosition.z);
 
-		const float distance = sqrt(x * x + y * y);
-		pitch = atan(lookAtPosition.y / distance);
+		const float distance = sqrt(x * x + z * z);
+		pitch = atanf(lookAtPosition.y / distance);
 	}
 
 	float yaw = 0.0f;
 	// Avoids dividing zero by zero or something weird
 	if (lookAtPosition.x != 0.0f)
-		yaw = atan(lookAtPosition.x / lookAtPosition.z);
+		yaw = atanf(lookAtPosition.x / lookAtPosition.z);
 
 	// If bigger than zero add pi to rotate around
 	if (lookAtPosition.z > 0)
 		yaw += XM_PI;
 
 	SetRotation(pitch, yaw, 0.0f);
+}
+
+SphereCollider* Camera::GetCollider()
+{
+	return &m_collider;
 }
 
 const XMVECTOR& Camera::GetForwardVector()

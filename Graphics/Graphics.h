@@ -3,11 +3,11 @@
 //#include <wrl/client.h> // ComPtr
 #include "Shaders.h"
 #include "Camera.h"
-#include "../Entities/GameObject.h"
+#include "../Entities/Rock.h"
+#include "../Entities/Player.h"
 #include "../UI/text2D.h"
 #include "../Map.h"
-#include "..\Light\Light.h"
-#include "..\Light\DirectionalLight.h"
+#include "../Light/DirectionalLight.h"
 #include "../Light/PointLight.h"
 
 class Graphics
@@ -16,10 +16,11 @@ public:
 	bool Initialise(HWND hWnd, int width, int height);
 	void RenderFrame();
 
-	Camera m_camera;
-	GameObject m_sphere;
+	Camera* m_camera;
 	GameObject m_skybox;
 	Map* m_map;
+
+	Player* m_player;
 
 	Light* m_ambientLight;
 	DirectionalLight* m_directioanlLight;
@@ -45,7 +46,6 @@ private:
 
 	// Buffers
 	ConstantBuffer<CB_VS_Model> m_cb_vertexShader;
-	ConstantBuffer<CB_PixelShader> m_cb_pixelShader;
 
 	// Depth and Stencil
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_depthStencilView;

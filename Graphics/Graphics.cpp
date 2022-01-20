@@ -21,21 +21,25 @@ void Graphics::RenderFrame()
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView.Get(), bgcolor);
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+	// Set the Sampler
 	m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
+
 	// Set Rasterizer and DepthStencilState to Skybox
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilStateSkyBox.Get(), 0);
 	m_deviceContext->RSSetState(m_rasterizerStateSkyBox.Get());
-	m_skybox.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix(), m_ambientLight, m_directioanlLight, nullptr);
+	
+	// Draw Skybox
+	m_skybox.Draw(m_camera->GetViewMatrix() * m_camera->GetProjectionMatrix(), m_ambientLight, m_directioanlLight, nullptr);
 	
 	// Set Rasterizer and DepthStencilState to default
 	m_deviceContext->RSSetState(m_rasterizerState.Get());
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
 
-	m_map->Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix(), m_ambientLight, m_directioanlLight, m_pointLight);
-	//m_sphere.Draw(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix(), m_ambientLight, m_directioanlLight, m_pointLight);
-
+	// Draw GameObjects and UI
+	m_map->Draw(m_camera->GetViewMatrix() * m_camera->GetProjectionMatrix(), m_ambientLight, m_directioanlLight, m_pointLight);
 	m_text->RenderText();
 
+	// Swap buffers
 	m_swapChain->Present(0, NULL);
 }
 
@@ -304,37 +308,30 @@ bool Graphics::InitialiseScene()
 		return false;
 	}
 
-	hr = m_cb_pixelShader.Initialize(m_device.Get(), m_deviceContext.Get());
-	if (FAILED(hr))
-	{
-		OutputDebugString("Failed to create constant buffer!");
-		return false;
-	}
-
-	// Initialise Model
-	if (!m_sphere.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Sphere.obj", "Assets/Textures/rock.png", "ModelShader.cso", "PixelShader.cso", m_cb_vertexShader))
-		return false;
-
-	m_sphere.SetScale(0.9f, 0.9f, 0.9f);
-	m_sphere.SetPosition(4.5f, 2.9f, 3.0f);
-
+	// SkyBox
 	if (!m_skybox.Initialise(m_device.Get(), m_deviceContext.Get(), "Assets/Models/Cube.obj", "Assets/Textures/skybox02.dds", "SkyBoxVS.cso", "SkyBoxPS.cso", m_cb_vertexShader))
 		return false;
 	m_skybox.SetScale(100.0f, 100.0f, 100.0f);
 
-	m_camera.SetPosition(0.0f, 0.0f, -5.0f);
-	m_camera.SetProjectMatrix(90.0f, static_cast<float>(m_windowWidth) / static_cast<float>(m_windowHeight), 0.1f, 1000.0f);
-
+	// Map
 	m_map = new Map(m_device.Get(), m_deviceContext.Get(), "Assets/Maps/map.txt", m_cb_vertexShader);
 
+	// Camera - Future Player
+	m_camera = new Camera();
+	m_camera->SetProjectMatrix(90.0f, static_cast<float>(m_windowWidth) / static_cast<float>(m_windowHeight), 0.1f, 1000.0f);
+	m_player = new Player(m_map, m_camera);
+
+
+	// Lights
 	m_ambientLight = new Light(0.1f, 0.1f, 0.1f, 0.1f);
-	m_directioanlLight = new DirectionalLight(0.5f, 25.0f, 0.0f, 1.0f, 0.6f, 0.2f, 1.0f);
+	m_directioanlLight = new DirectionalLight(0.5f, 25.0f, 0.0f, 0.0f, 0.6f, 0.2f, 1.0f);
 	m_directioanlLight->SetColour(0.5f, 0.5f, 0.5f, 1.0f);
 
 	m_pointLight = new PointLight();
-	m_pointLight->SetColour(1.0f, 0.0f, 0.0f, 1.0f);
+	m_pointLight->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
 	m_pointLight->SetPosition(4.5f, 5.0f, 3.0f);
 
+	// Text
 	m_text = new Text2D("Assets/Fonts/font1.png", m_device.Get(), m_deviceContext.Get());
 
 	return true;

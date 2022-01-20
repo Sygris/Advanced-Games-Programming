@@ -31,6 +31,7 @@ bool GameObject::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 
     m_sphereCollider.CalculateModelCentrePoint(m_model->GetObjFileModel());
     m_sphereCollider.CalculateSphereColliderRadius(m_model->GetObjFileModel());
+    m_boxCollider.CalculateCollider(m_model->GetObjFileModel());
 
     return true;
 }

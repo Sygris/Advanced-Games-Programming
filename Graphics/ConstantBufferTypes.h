@@ -1,4 +1,6 @@
 #pragma once
+#define _XM_NO_INTRINSICS_
+#define XM_NO_ALIGNMENT
 #include <DirectXMath.h>
 
 #pragma region Vertex Shader - Constant Buffers

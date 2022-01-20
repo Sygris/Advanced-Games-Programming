@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "Entities/HealthKit.h"
 
 bool Engine::Initliase(HINSTANCE hInstance, std::string windowTitle, std::string windowClass, int width, int height)
 {
@@ -16,6 +17,8 @@ bool Engine::Initliase(HINSTANCE hInstance, std::string windowTitle, std::string
 	m_mouse = new Mouse(hInstance, m_window.GetHandler());
 	m_mouse->Initialise();
 
+	m_graphics.m_player->SetupInput(m_keyboard, m_mouse);
+
 	return true;
 }
 
@@ -29,68 +32,22 @@ void Engine::Update()
 	float deltaTime = static_cast<float>(m_timer.GetMilisecondsElapsed());
 	m_timer.Restart();
 
-	m_keyboard->ReadInputStates();
-	m_mouse->ReadInputStates();
+	m_graphics.m_player->Update(deltaTime);
 
-	m_graphics.m_sphere.AdjustRotation(0.0f, 0.001f * deltaTime, 0.0f);
-
-	if (m_mouse->ButtonDown(0))
+	for (size_t rock = 0; rock < Rock::RockList.size(); rock++)
 	{
-		m_graphics.m_camera.AdjustRotation((float)m_mouse->GetMousePosY() * 0.005f, (float)m_mouse->GetMousePosX() * 0.005f, 0);
+		Rock::RockList[rock]->Update(deltaTime);
 	}
 
-	if (m_keyboard->IsKeyPreesed(DIK_W))
+	for (size_t healthKit = 0; healthKit < HealthKit::HealthKitList.size(); healthKit++)
 	{
-		m_graphics.m_camera.AdjustPosition(m_graphics.m_camera.GetForwardVector() * 0.01f * deltaTime);
+		HealthKit::HealthKitList[healthKit]->Update(deltaTime);
 	}
 
-	if (m_keyboard->IsKeyPreesed(DIK_A))
-	{
-		m_graphics.m_camera.AdjustPosition(m_graphics.m_camera.GetLeftVector() * 0.01f * deltaTime);
-	}
+	std::string lifesText = "Lifes left " + std::to_string(m_graphics.m_player->GetLifes());
+	m_graphics.m_text->AddText(lifesText, -0.99f, 0.99f, 0.045f);
 
-	if (m_keyboard->IsKeyPreesed(DIK_S))
-	{
-		m_graphics.m_camera.AdjustPosition(m_graphics.m_camera.GetBackwardVector() * 0.01f * deltaTime);
-	}
-
-	if (m_keyboard->IsKeyPreesed(DIK_D))
-	{
-		m_graphics.m_camera.AdjustPosition(m_graphics.m_camera.GetRightVector() * 0.01f * deltaTime);
-	}
-
-	if (m_keyboard->IsKeyPreesed(DIK_SPACE))
-	{
-		m_graphics.m_camera.AdjustPosition(0.0f, 0.01f * deltaTime, 0.0f);
-	}
-	if (m_keyboard->IsKeyPreesed(DIK_Z))
-	{
-		m_graphics.m_camera.AdjustPosition(0.0f, -0.01f * deltaTime, 0.0f);
-	}
-
-	m_graphics.m_text->AddText("Move WASD", -0.99f, 0.99f, 0.045f);
-	m_graphics.m_text->AddText("Rotate Hold Left Click on the mouse", -0.99f, 0.89f, 0.045f);
-	m_graphics.m_text->AddText("UP Space Bar", -0.99f, 0.79f, 0.045f);
-
-	//if (m_keyboard->IsKeyPreesed(DIK_RIGHTARROW))
-	//{
-	//	m_graphics.m_skybox.AdjustPosition(m_graphics.m_skybox.GetRightVector() * 0.01f * deltaTime);
-
-	//	if (SphereToSphereCollision(m_graphics.m_skybox, m_graphics.m_sphere))
-	//	{
-	//		m_graphics.m_skybox.AdjustPosition(m_graphics.m_skybox.GetLeftVector() * 0.01f * deltaTime);
-	//	}
-	//}
-
-	//if (m_keyboard->IsKeyPreesed(DIK_LEFTARROW))
-	//{
-	//	m_graphics.m_skybox.AdjustPosition(m_graphics.m_skybox.GetLeftVector() * 0.01f * deltaTime);
-
-	//	if (SphereToSphereCollision(m_graphics.m_skybox, m_graphics.m_sphere))
-	//	{
-	//		m_graphics.m_skybox.AdjustPosition(m_graphics.m_skybox.GetRightVector() * 0.01f * deltaTime);
-	//	}
-	//}
+	m_graphics.m_pointLight->SetPosition(m_graphics.m_player->GetCamera()->GetPositionVector());
 }
 
 void Engine::RenderFrame()

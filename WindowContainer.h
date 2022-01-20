@@ -17,7 +17,5 @@ protected:
 	Keyboard* m_keyboard;
 	Mouse* m_mouse;
 	Graphics m_graphics;
-private:
-
 };
 

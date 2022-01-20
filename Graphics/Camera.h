@@ -1,5 +1,9 @@
 #pragma once
+#define _XM_NO_INTRINSICS_
+#define XM_NO_ALIGNMENT
 #include <DirectXMath.h>
+#include "../Physics/Colliders.h"
+
 // I decided to use the namespace to speed up and
 // avoid having to write DirectX:: multiple times
 using namespace DirectX;
@@ -42,6 +46,9 @@ public:
 	// Set Look At position
 	void SetLookAtPos(XMFLOAT3 lookAtPosition);
 
+	// Get Collider
+	SphereCollider* GetCollider();
+
 	// Get Directional Vectors
 	const XMVECTOR& GetForwardVector();
 	const XMVECTOR& GetRightVector();
@@ -67,6 +74,9 @@ private:
 	// MATRICES
 	XMMATRIX m_viewMatrix;
 	XMMATRIX m_projectionMatrix;
+
+	// Collider
+	SphereCollider m_collider;
 
 	// Default Vectors
 	const XMVECTOR DEFAULT_FORWARD_VECTOR = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
