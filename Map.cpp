@@ -11,6 +11,23 @@ Map::Map(ID3D11Device* device, ID3D11DeviceContext* deviceContext, std::string f
 
 Map::~Map()
 {
+	for (size_t wall = 0; wall < m_walls.size(); wall++)
+	{
+		delete m_walls[wall];
+		m_walls[wall] = nullptr;
+	}
+
+	for (size_t floor = 0; floor < m_floor.size(); floor++)
+	{
+		delete m_floor[floor];
+		m_floor[floor] = nullptr;
+	}
+
+	if (m_exit != nullptr)
+	{
+		delete m_exit;
+		m_exit = nullptr;
+	}
 }
 
 void Map::Draw(const XMMATRIX& viewProjectionMatrix, Light* ambientLight, DirectionalLight* directionalLight, PointLight* pointLight)
@@ -34,6 +51,8 @@ void Map::Draw(const XMMATRIX& viewProjectionMatrix, Light* ambientLight, Direct
 	{
 		HealthKit::HealthKitList[healthKit]->Draw(viewProjectionMatrix, ambientLight, directionalLight, pointLight);
 	}
+
+	m_exit->Draw(viewProjectionMatrix, ambientLight, directionalLight, pointLight);
 }
 
 void Map::LoadMapFromFile(std::string filePath)
@@ -92,9 +111,21 @@ void Map::InitializeMap(ID3D11Device* device, ID3D11DeviceContext* deviceContext
 				CreateHealthKit(device, deviceContext, cbVertexShader, i, j);
 				break;
 			}
+			case '9':
+			{
+				m_exit = new GameObject();
+				m_exit->SetPosition(i * 2, 2.0f, j * 1);
+				m_exit->Initialise(device, deviceContext, "Assets/Models/cube.obj", "Assets/Textures/exit.png", "ModelShader.cso", "PixelShader.cso", cbVertexShader);
+				break;
+			}
 			}
 		}
 	}
+}
+
+GameObject* Map::GetExit()
+{
+	return m_exit;
 }
 
 std::vector<GameObject*> Map::GetWalls()

@@ -23,12 +23,15 @@ public:
 
 	void Draw(const XMMATRIX& viewProjectionMatrix, Light* ambientLight, DirectionalLight* directionalLight, PointLight* pointLight);
 
+	GameObject* GetExit();
 	std::vector<GameObject*> GetWalls();
 	XMFLOAT3 GetPlayerStartPosition();
 private:
 	std::vector<std::string> m_mapLayout;
 	std::vector<GameObject*> m_floor;
 	std::vector<GameObject*> m_walls;
+	GameObject* m_exit;
+
 	XMFLOAT3 m_playerStartPosition;
 
 	void LoadMapFromFile(std::string filePath);

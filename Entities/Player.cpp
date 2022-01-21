@@ -170,6 +170,12 @@ void Player::CheckCollisions()
 
 		}
 	}
+
+	if (CameraToSphereCollision(m_camera, m_map->GetExit()))
+	{
+		// FUTURE: Add a proper way to finish and close the game
+		exit(0);
+	}
 }
 
 void Player::Hit()
